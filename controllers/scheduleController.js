@@ -28,7 +28,6 @@ const createSchedule = async (req, res) => {
       throw new NotFoundError('Course not found');
     }
 
-    // Validate teacher exists
     const teacher = await Teacher.findById(teacherId);
     if (!teacher) {
       throw new NotFoundError('Teacher not found');
