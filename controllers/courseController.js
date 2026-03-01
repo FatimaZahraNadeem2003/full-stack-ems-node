@@ -24,7 +24,6 @@ const addCourse = async (req, res) => {
       status
     } = req.body;
 
-    // Check if course code already exists
     const existingCourse = await Course.findOne({ code });
     if (existingCourse) {
       throw new BadRequestError('Course code already exists');
