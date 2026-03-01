@@ -241,7 +241,6 @@ const getStudentsCount = async (req, res) => {
       })
     ]);
 
-    // Get class distribution with percentages
     const classDistribution = byClass.map(item => ({
       class: item._id,
       count: item.count,
