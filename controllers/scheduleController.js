@@ -148,7 +148,6 @@ const getAllSchedules = async (req, res) => {
 
     const total = await Schedule.countDocuments(query);
 
-    // Group by day for easier frontend consumption
     const groupedByDay = schedules.reduce((acc, schedule) => {
       const day = schedule.dayOfWeek;
       if (!acc[day]) acc[day] = [];
