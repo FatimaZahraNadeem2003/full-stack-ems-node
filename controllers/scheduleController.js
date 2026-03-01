@@ -65,7 +65,6 @@ const createSchedule = async (req, res) => {
       throw new BadRequestError('Teacher already has a class at this time');
     }
 
-    // Create schedule
     const schedule = await Schedule.create({
       courseId,
       teacherId,
