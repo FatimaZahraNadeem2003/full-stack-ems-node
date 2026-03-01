@@ -283,7 +283,6 @@ const getCoursesCount = async (req, res) => {
   try {
     const { status, department, level } = req.query;
 
-    // Build query
     const query = {};
     if (status) query.status = status;
     if (department) query.department = department;
@@ -301,22 +300,16 @@ const getCoursesCount = async (req, res) => {
       averageCredits,
       totalEnrollments
     ] = await Promise.all([
-      // Total courses
       Course.countDocuments(query),
       
-      // Active courses
       Course.countDocuments({ ...query, status: 'active' }),
       
-      // Inactive courses
       Course.countDocuments({ ...query, status: 'inactive' }),
       
-      // Upcoming courses
       Course.countDocuments({ ...query, status: 'upcoming' }),
       
-      // Completed courses
       Course.countDocuments({ ...query, status: 'completed' }),
       
-      // Courses by department
       Course.aggregate([
         { $match: query },
         { $group: { 
@@ -327,7 +320,6 @@ const getCoursesCount = async (req, res) => {
         { $sort: { count: -1 } }
       ]),
       
-      // Courses by level
       Course.aggregate([
         { $match: query },
         { $group: { 
@@ -337,7 +329,6 @@ const getCoursesCount = async (req, res) => {
         }
       ]),
       
-      // Courses by credits
       Course.aggregate([
         { $match: query },
         { $group: { 
@@ -348,7 +339,6 @@ const getCoursesCount = async (req, res) => {
         { $sort: { _id: 1 } }
       ]),
       
-      // Average credits
       Course.aggregate([
         { $match: query },
         { $group: { 
@@ -358,11 +348,9 @@ const getCoursesCount = async (req, res) => {
         }
       ]),
       
-      // Total enrollments across all courses
       Enrollment.countDocuments()
     ]);
 
-    // Get enrollment distribution per course
     const enrollmentPerCourse = await Enrollment.aggregate([
       { $match: { status: 'enrolled' } },
       { $group: { 
@@ -435,7 +423,6 @@ const getTodayClasses = async (req, res) => {
     const todayDay = days[today.getDay()];
     const currentTime = today.toTimeString().slice(0, 5);
 
-    // Get today's schedules
     const schedules = await Schedule.find({ 
       dayOfWeek: todayDay,
       status: 'scheduled'
@@ -455,7 +442,6 @@ const getTodayClasses = async (req, res) => {
     ])
     .sort({ startTime: 1 });
 
-    // Get enrolled students count for each course
     const classesWithDetails = await Promise.all(
       schedules.map(async (schedule) => {
         const enrolledCount = await Enrollment.countDocuments({
@@ -463,7 +449,6 @@ const getTodayClasses = async (req, res) => {
           status: 'enrolled'
         });
 
-        // Determine class status
         let classStatus = 'upcoming';
         if (schedule.startTime <= currentTime && schedule.endTime >= currentTime) {
           classStatus = 'ongoing';
@@ -486,7 +471,6 @@ const getTodayClasses = async (req, res) => {
       })
     );
 
-    // Group classes by status
     const groupedClasses = {
       ongoing: classesWithDetails.filter(c => c.status === 'ongoing'),
       upcoming: classesWithDetails.filter(c => c.status === 'upcoming'),
@@ -534,23 +518,19 @@ const getTeacherWorkload = async (req, res) => {
           weeklyClasses,
           totalStudents
         ] = await Promise.all([
-          // Courses assigned
           Course.countDocuments({ teacherId: teacher._id, status: 'active' }),
           
-          // Today's classes
           Schedule.countDocuments({
             teacherId: teacher._id,
             dayOfWeek: days[today.getDay()],
             status: 'scheduled'
           }),
           
-          // Weekly classes
           Schedule.countDocuments({
             teacherId: teacher._id,
             status: 'scheduled'
           }),
           
-          // Total students taught
           Enrollment.distinct('studentId', {
             courseId: { $in: await Course.find({ teacherId: teacher._id }).distinct('_id') },
             status: 'enrolled'
@@ -574,7 +554,6 @@ const getTeacherWorkload = async (req, res) => {
       })
     );
 
-    // Sort by workload (most classes first)
     workloadData.sort((a, b) => b.workload.weeklyClasses - a.workload.weeklyClasses);
 
     res.status(StatusCodes.OK).json({
