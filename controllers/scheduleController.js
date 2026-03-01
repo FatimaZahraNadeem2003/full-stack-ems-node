@@ -49,7 +49,6 @@ const createSchedule = async (req, res) => {
       throw new BadRequestError('Room already booked for this time slot');
     }
 
-    // Check teacher availability
     const teacherConflict = await Schedule.findOne({
       teacherId,
       dayOfWeek,
