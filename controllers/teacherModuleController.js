@@ -238,7 +238,6 @@ const getCourseGrades = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    // Group grades by student
     const studentsMap = new Map();
     grades.forEach(grade => {
       const studentId = grade.studentId._id.toString();
