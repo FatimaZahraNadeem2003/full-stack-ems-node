@@ -31,7 +31,6 @@ const getDashboardStats = async (req, res) => {
       
       Course.countDocuments(),
       
-      // Active courses
       Course.countDocuments({ status: 'active' }),
       
       // Total enrollments
