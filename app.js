@@ -66,8 +66,10 @@ app.use("/api/admin/students", studentRoutes);
 app.use("/api/admin/teachers", teacherRoutes);
 app.use("/api/admin/courses", courseRoutes);
 app.use("/api/admin/schedules", scheduleRoutes);
-// New enrollment routes with role-specific endpoints
-app.use("/api/enrollments", enrollmentRoutes);
+// Enrollment routes with role-specific endpoints
+app.use("/api/admin/enrollments", enrollmentRoutes);
+app.use("/api/teacher/enrollments", enrollmentRoutes);
+app.use("/api/student/enrollments", enrollmentRoutes);
 app.use("/api/admin/reports", reportsRoutes);
 
 app.use("/api/teacher", teacherRoutes);
