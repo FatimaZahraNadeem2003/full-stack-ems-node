@@ -274,7 +274,6 @@ const deleteCourse = async (req, res) => {
       throw new NotFoundError('Course not found');
     }
 
-    // Check if course has any enrollments
     const Enrollment = require('../models/Enrollment');
     const enrolledStudents = await Enrollment.countDocuments({ 
       courseId: id,
