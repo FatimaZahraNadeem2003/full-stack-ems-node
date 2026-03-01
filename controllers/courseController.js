@@ -269,7 +269,6 @@ const deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find course
     const course = await Course.findById(id);
     if (!course) {
       throw new NotFoundError('Course not found');
