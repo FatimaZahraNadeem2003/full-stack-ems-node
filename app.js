@@ -26,6 +26,7 @@ const testRoutes = require('./routes/test');
 const studentRoutes = require('./routes/studentRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
 
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
@@ -55,6 +56,8 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/admin/students", studentRoutes);
 app.use("/api/admin/teachers", teacherRoutes);
 app.use("/api/admin/courses", courseRoutes);
+app.use("/api/admin/schedules", scheduleRoutes);
+
 
 
 app.use("/api/v1/test", testRoutes);
