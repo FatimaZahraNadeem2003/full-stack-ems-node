@@ -52,7 +52,6 @@ const createEnrollment = async (req, res) => {
       throw new BadRequestError('Course has reached maximum capacity');
     }
 
-    // Create enrollment
     const enrollment = await Enrollment.create({
       studentId,
       courseId,
