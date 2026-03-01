@@ -2,11 +2,6 @@ const { Schedule, Course, Teacher } = require('../models');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
-/**
- * @desc    Create new schedule
- * @route   POST /api/admin/schedules
- * @access  Private/Admin
- */
 const createSchedule = async (req, res) => {
   try {
     const {
@@ -101,11 +96,6 @@ const createSchedule = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all schedules
- * @route   GET /api/admin/schedules
- * @access  Private/Admin
- */
 const getAllSchedules = async (req, res) => {
   try {
     const { 
@@ -170,11 +160,6 @@ const getAllSchedules = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get schedule by ID
- * @route   GET /api/admin/schedules/:id
- * @access  Private/Admin
- */
 const getScheduleById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -205,11 +190,6 @@ const getScheduleById = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update schedule
- * @route   PUT /api/admin/schedules/:id
- * @access  Private/Admin
- */
 const updateSchedule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -282,11 +262,6 @@ const updateSchedule = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete schedule
- * @route   DELETE /api/admin/schedules/:id
- * @access  Private/Admin
- */
 const deleteSchedule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -308,11 +283,6 @@ const deleteSchedule = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get weekly schedule
- * @route   GET /api/admin/schedules/weekly
- * @access  Private/Admin
- */
 const getWeeklySchedule = async (req, res) => {
   try {
     const { weekStart, semester, academicYear } = req.query;

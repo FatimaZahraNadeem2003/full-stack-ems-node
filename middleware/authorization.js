@@ -22,9 +22,6 @@ const authorize = (...allowedRoles) => {
     };
 };
 
-/**
- * Admin only middleware
- */
 const adminMiddleware = (req, res, next) => {
     if (!req.user) {
         throw new UnauthenticatedError("Authentication required");
@@ -37,9 +34,6 @@ const adminMiddleware = (req, res, next) => {
     next();
 };
 
-/**
- * Teacher middleware - attaches teacherId to req.user
- */
 const teacherMiddleware = async (req, res, next) => {
     try {
         if (!req.user) {
@@ -69,9 +63,6 @@ const teacherMiddleware = async (req, res, next) => {
     }
 };
 
-/**
- * Student middleware - attaches studentId to req.user
- */
 const studentMiddleware = async (req, res, next) => {
     try {
         if (!req.user) {
@@ -101,10 +92,6 @@ const studentMiddleware = async (req, res, next) => {
     }
 };
 
-/**
- * Combined middleware for teacher routes - attaches teacherId
- * Use this for routes that need teacher access with teacherId
- */
 const teacherAuth = async (req, res, next) => {
     try {
         if (!req.user) {
@@ -134,10 +121,6 @@ const teacherAuth = async (req, res, next) => {
     }
 };
 
-/**
- * Combined middleware for student routes - attaches studentId
- * Use this for routes that need student access with studentId
- */
 const studentAuth = async (req, res, next) => {
     try {
         if (!req.user) {
@@ -167,10 +150,6 @@ const studentAuth = async (req, res, next) => {
     }
 };
 
-/**
- * Combined middleware for both teacher and student routes
- * Attaches teacherId or studentId based on role
- */
 const teacherOrStudentAuth = async (req, res, next) => {
     try {
         if (!req.user) {

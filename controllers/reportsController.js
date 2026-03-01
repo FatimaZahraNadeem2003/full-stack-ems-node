@@ -1,11 +1,6 @@
 const { User, Student, Teacher, Course, Enrollment, Schedule } = require('../models');
 const { StatusCodes } = require('http-status-codes');
 
-/**
- * @desc    Get dashboard statistics
- * @route   GET /api/admin/reports/dashboard
- * @access  Private/Admin
- */
 const getDashboardStats = async (req, res) => {
   try {
     const today = new Date();
@@ -182,11 +177,6 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get total students count with details
- * @route   GET /api/admin/reports/students-count
- * @access  Private/Admin
- */
 const getStudentsCount = async (req, res) => {
   try {
     const { status, class: className, section } = req.query;
@@ -274,11 +264,6 @@ const getStudentsCount = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get total courses count with details
- * @route   GET /api/admin/reports/courses-count
- * @access  Private/Admin
- */
 const getCoursesCount = async (req, res) => {
   try {
     const { status, department, level } = req.query;
@@ -411,11 +396,6 @@ const getCoursesCount = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get today's classes
- * @route   GET /api/admin/reports/today-classes
- * @access  Private/Admin
- */
 const getTodayClasses = async (req, res) => {
   try {
     const today = new Date();
@@ -497,11 +477,6 @@ const getTodayClasses = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get teacher workload report
- * @route   GET /api/admin/reports/teacher-workload
- * @access  Private/Admin
- */
 const getTeacherWorkload = async (req, res) => {
   try {
     const teachers = await Teacher.find({ status: 'active' })

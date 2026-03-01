@@ -2,11 +2,6 @@ const { Student, User, Course, Enrollment, Grade, Schedule, Remark } = require('
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
-/**
- * @desc    Get student's own profile
- * @route   GET /api/student/profile
- * @access  Private/Student
- */
 const getStudentProfile = async (req, res) => {
   try {
     const studentId = req.user.studentId;
@@ -71,11 +66,6 @@ const getStudentProfile = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update student's own profile
- * @route   PUT /api/student/profile
- * @access  Private/Student
- */
 const updateStudentProfile = async (req, res) => {
   try {
     const studentId = req.user.studentId;
@@ -118,11 +108,6 @@ const updateStudentProfile = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's enrolled courses
- * @route   GET /api/student/courses
- * @access  Private/Student
- */
 const getStudentCourses = async (req, res) => {
   try {
     const studentId = req.user.studentId;
@@ -174,11 +159,6 @@ const getStudentCourses = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get course details for student
- * @route   GET /api/student/courses/:courseId
- * @access  Private/Student
- */
 const getStudentCourseDetails = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -263,11 +243,6 @@ const getStudentCourseDetails = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's class schedule
- * @route   GET /api/student/schedule
- * @access  Private/Student
- */
 const getStudentSchedule = async (req, res) => {
   try {
     const studentId = req.user.studentId;
@@ -329,11 +304,6 @@ const getStudentSchedule = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's all grades
- * @route   GET /api/student/grades
- * @access  Private/Student
- */
 const getAllStudentGrades = async (req, res) => {
   try {
     const studentId = req.user.studentId;
@@ -394,11 +364,6 @@ const getAllStudentGrades = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get course-wise grades
- * @route   GET /api/student/grades/course/:courseId
- * @access  Private/Student
- */
 const getCourseWiseGrades = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -462,11 +427,6 @@ const getCourseWiseGrades = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's overall progress
- * @route   GET /api/student/progress
- * @access  Private/Student
- */
 const getStudentProgress = async (req, res) => {
   try {
     const studentId = req.user.studentId;

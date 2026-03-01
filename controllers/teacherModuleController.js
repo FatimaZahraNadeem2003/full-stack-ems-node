@@ -2,11 +2,6 @@ const { Course, Teacher, User, Student, Enrollment, Grade, Schedule, Remark } = 
 const { BadRequestError, NotFoundError, UnauthorizedError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
-/**
- * @desc    Get teacher's assigned courses
- * @route   GET /api/teacher/courses
- * @access  Private/Teacher
- */
 const getTeacherCourses = async (req, res) => {
   try {
     const teacherId = req.user.teacherId;
@@ -43,11 +38,6 @@ const getTeacherCourses = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get enrolled students for a course
- * @route   GET /api/teacher/courses/:courseId/students
- * @access  Private/Teacher
- */
 const getCourseStudents = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -100,11 +90,6 @@ const getCourseStudents = async (req, res) => {
   }
 };
 
-/**
- * @desc    Add grade for student
- * @route   POST /api/teacher/grades
- * @access  Private/Teacher
- */
 const addGrade = async (req, res) => {
   try {
     const {
@@ -167,11 +152,6 @@ const addGrade = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update grade
- * @route   PUT /api/teacher/grades/:id
- * @access  Private/Teacher
- */
 const updateGrade = async (req, res) => {
   try {
     const { id } = req.params;
@@ -213,11 +193,6 @@ const updateGrade = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all grades for a course
- * @route   GET /api/teacher/grades/course/:courseId
- * @access  Private/Teacher
- */
 const getCourseGrades = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -282,11 +257,6 @@ const getCourseGrades = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's grades
- * @route   GET /api/teacher/grades/student/:studentId
- * @access  Private/Teacher
- */
 const getStudentGrades = async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -357,11 +327,6 @@ const getStudentGrades = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get teacher's schedule
- * @route   GET /api/teacher/schedules
- * @access  Private/Teacher
- */
 const getTeacherSchedule = async (req, res) => {
   try {
     const teacherId = req.user.teacherId;
@@ -394,11 +359,6 @@ const getTeacherSchedule = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update schedule (if allowed)
- * @route   PUT /api/teacher/schedules/:id
- * @access  Private/Teacher
- */
 const updateSchedule = async (req, res) => {
   try {
     const { id } = req.params;
@@ -440,11 +400,6 @@ const updateSchedule = async (req, res) => {
   }
 };
 
-/**
- * @desc    Add remark for student
- * @route   POST /api/teacher/remarks
- * @access  Private/Teacher
- */
 const addRemark = async (req, res) => {
   try {
     const { studentId, courseId, remark } = req.body;
@@ -499,11 +454,6 @@ const addRemark = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's remarks
- * @route   GET /api/teacher/remarks/student/:studentId
- * @access  Private/Teacher
- */
 const getStudentRemarks = async (req, res) => {
   try {
     const { studentId } = req.params;

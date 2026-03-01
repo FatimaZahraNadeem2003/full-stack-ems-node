@@ -2,11 +2,7 @@ const { Course, Teacher, User } = require('../models');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
-/**
- * @desc    Add new course
- * @route   POST /api/admin/courses
- * @access  Private/Admin
- */
+
 const addCourse = async (req, res) => {
   try {
     const {
@@ -73,11 +69,7 @@ const addCourse = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all courses
- * @route   GET /api/admin/courses
- * @access  Private/Admin
- */
+
 const getAllCourses = async (req, res) => {
   try {
     const { 
@@ -149,11 +141,7 @@ const getAllCourses = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single course by ID
- * @route   GET /api/admin/courses/:id
- * @access  Private/Admin
- */
+
 const getCourseById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -202,11 +190,6 @@ const getCourseById = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update course
- * @route   PUT /api/admin/courses/:id
- * @access  Private/Admin
- */
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -260,11 +243,6 @@ const updateCourse = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete course
- * @route   DELETE /api/admin/courses/:id
- * @access  Private/Admin
- */
 const deleteCourse = async (req, res) => {
   try {
     const { id } = req.params;
@@ -301,11 +279,7 @@ const deleteCourse = async (req, res) => {
   }
 };
 
-/**
- * @desc    Assign teacher to course
- * @route   POST /api/admin/courses/:courseId/assign-teacher
- * @access  Private/Admin
- */
+
 const assignTeacher = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -360,11 +334,6 @@ const assignTeacher = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get course statistics
- * @route   GET /api/admin/courses/stats
- * @access  Private/Admin
- */
 const getCourseStats = async (req, res) => {
   try {
     const totalCourses = await Course.countDocuments();

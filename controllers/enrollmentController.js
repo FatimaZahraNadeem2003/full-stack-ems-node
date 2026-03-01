@@ -2,11 +2,6 @@ const { Enrollment, Student, Course, User } = require('../models');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
-/**
- * @desc    Enroll student in course
- * @route   POST /api/admin/enrollments
- * @access  Private/Admin
- */
 const createEnrollment = async (req, res) => {
   try {
     const {
@@ -85,11 +80,6 @@ const createEnrollment = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all enrollments
- * @route   GET /api/admin/enrollments
- * @access  Private/Admin
- */
 const getAllEnrollments = async (req, res) => {
   try {
     const { 
@@ -158,11 +148,6 @@ const getAllEnrollments = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get enrollment by ID
- * @route   GET /api/admin/enrollments/:id
- * @access  Private/Admin
- */
 const getEnrollmentById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -202,11 +187,6 @@ const getEnrollmentById = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update enrollment
- * @route   PUT /api/admin/enrollments/:id
- * @access  Private/Admin
- */
 const updateEnrollment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -247,11 +227,6 @@ const updateEnrollment = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete enrollment
- * @route   DELETE /api/admin/enrollments/:id
- * @access  Private/Admin
- */
 const deleteEnrollment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -273,11 +248,6 @@ const deleteEnrollment = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get student's courses
- * @route   GET /api/admin/enrollments/student/:studentId
- * @access  Private/Admin
- */
 const getStudentCourses = async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -337,11 +307,6 @@ const getStudentCourses = async (req, res) => {
   }
 };
 
-/**
- * @desc    Bulk enroll students
- * @route   POST /api/admin/enrollments/bulk
- * @access  Private/Admin
- */
 const bulkEnroll = async (req, res) => {
   try {
     const { courseId, studentIds } = req.body;

@@ -164,7 +164,6 @@ const validateCourseUpdate = [
   }
 ];
 
-// Schedule Validation
 const validateSchedule = [
   body('courseId').notEmpty().withMessage('Course ID is required')
     .isMongoId().withMessage('Invalid course ID format'),
