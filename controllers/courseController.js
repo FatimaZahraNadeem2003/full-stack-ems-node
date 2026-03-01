@@ -227,7 +227,6 @@ const updateCourse = async (req, res) => {
       }
     }
 
-    // If teacherId provided, verify teacher exists
     if (updateData.teacherId) {
       const teacher = await Teacher.findById(updateData.teacherId);
       if (!teacher) {
