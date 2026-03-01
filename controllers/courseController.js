@@ -96,7 +96,6 @@ const getAllCourses = async (req, res) => {
     if (status) query.status = status;
     if (teacherId) query.teacherId = teacherId;
 
-    // Search by name, code, description
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
