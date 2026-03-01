@@ -1,7 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const { BadRequestError } = require('../errors');
 
-// Student Validation
 const validateStudent = [
   body('firstName').notEmpty().withMessage('First name is required')
     .isLength({ min: 2, max: 50 }).withMessage('First name must be 2-50 characters'),
@@ -27,7 +26,6 @@ const validateStudent = [
   }
 ];
 
-// Teacher Validation
 const validateTeacher = [
   body('firstName').notEmpty().withMessage('First name is required')
     .isLength({ min: 2, max: 50 }).withMessage('First name must be 2-50 characters'),
@@ -59,7 +57,6 @@ const validateTeacher = [
   }
 ];
 
-// Course Validation
 const validateCourse = [
   body('name').notEmpty().withMessage('Course name is required')
     .isLength({ min: 3, max: 100 }).withMessage('Course name must be 3-100 characters'),
@@ -107,7 +104,6 @@ const validateCourse = [
   }
 ];
 
-// Assign Teacher Validation
 const validateAssignTeacher = [
   body('teacherId').notEmpty().withMessage('Teacher ID is required')
     .isMongoId().withMessage('Invalid teacher ID format'),
@@ -121,7 +117,6 @@ const validateAssignTeacher = [
   }
 ];
 
-// Course Update Validation (partial updates allowed)
 const validateCourseUpdate = [
   body('name').optional().isLength({ min: 3, max: 100 })
     .withMessage('Course name must be 3-100 characters'),
@@ -169,10 +164,107 @@ const validateCourseUpdate = [
   }
 ];
 
+// Schedule Validation
+const validateSchedule = [
+  body('courseId').notEmpty().withMessage('Course ID is required')
+    .isMongoId().withMessage('Invalid course ID format'),
+  
+  body('teacherId').notEmpty().withMessage('Teacher ID is required')
+    .isMongoId().withMessage('Invalid teacher ID format'),
+  
+  body('dayOfWeek').notEmpty().withMessage('Day of week is required')
+    .isIn(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
+    .withMessage('Invalid day of week'),
+  
+  body('startTime').notEmpty().withMessage('Start time is required')
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Invalid time format (HH:MM)'),
+  
+  body('endTime').notEmpty().withMessage('End time is required')
+    .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).withMessage('Invalid time format (HH:MM)')
+    .custom((value, { req }) => {
+      if (value <= req.body.startTime) {
+        throw new Error('End time must be after start time');
+      }
+      return true;
+    }),
+  
+  body('room').notEmpty().withMessage('Room is required')
+    .isLength({ min: 2, max: 20 }).withMessage('Room must be 2-20 characters'),
+  
+  body('building').optional().isLength({ min: 2, max: 50 })
+    .withMessage('Building must be 2-50 characters'),
+  
+  body('semester').notEmpty().withMessage('Semester is required'),
+  
+  body('academicYear').notEmpty().withMessage('Academic year is required'),
+  
+  body('isRecurring').optional().isBoolean().withMessage('isRecurring must be boolean'),
+  
+  body('status').optional().isIn(['scheduled', 'cancelled', 'completed'])
+    .withMessage('Status must be scheduled, cancelled, or completed'),
+  
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new BadRequestError(errors.array()[0].msg);
+    }
+    next();
+  }
+];
+
+const validateEnrollment = [
+  body('studentId').notEmpty().withMessage('Student ID is required')
+    .isMongoId().withMessage('Invalid student ID format'),
+  
+  body('courseId').notEmpty().withMessage('Course ID is required')
+    .isMongoId().withMessage('Invalid course ID format'),
+  
+  body('status').optional().isIn(['enrolled', 'dropped', 'completed', 'pending'])
+    .withMessage('Invalid status'),
+  
+  body('progress').optional().isInt({ min: 0, max: 100 })
+    .withMessage('Progress must be between 0 and 100'),
+  
+  body('grade').optional().isIn(['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F', 'Incomplete', 'Not Graded'])
+    .withMessage('Invalid grade'),
+  
+  body('marksObtained').optional().isInt({ min: 0, max: 100 })
+    .withMessage('Marks must be between 0 and 100'),
+  
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new BadRequestError(errors.array()[0].msg);
+    }
+    next();
+  }
+];
+
+const validateBulkEnroll = [
+  body('courseId').notEmpty().withMessage('Course ID is required')
+    .isMongoId().withMessage('Invalid course ID format'),
+  
+  body('studentIds').isArray().withMessage('Student IDs must be an array')
+    .notEmpty().withMessage('Student IDs array cannot be empty'),
+  
+  body('studentIds.*').isMongoId().withMessage('Invalid student ID format in array'),
+  
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw new BadRequestError(errors.array()[0].msg);
+    }
+    next();
+  }
+];
+
 module.exports = {
   validateStudent,
   validateTeacher,
   validateCourse,
+  validateCourseUpdate,
   validateAssignTeacher,
-  validateCourseUpdate
+  validateSchedule,
+  validateEnrollment,
+  validateBulkEnroll
 };
