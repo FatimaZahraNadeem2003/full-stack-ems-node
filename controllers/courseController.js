@@ -212,7 +212,6 @@ const updateCourse = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    // Find course
     const course = await Course.findById(id);
     if (!course) {
       throw new NotFoundError('Course not found');
