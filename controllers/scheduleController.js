@@ -256,7 +256,6 @@ const updateSchedule = async (req, res) => {
       }
     }
 
-    // Update schedule
     const updatedSchedule = await Schedule.findByIdAndUpdate(
       id,
       updateData,
