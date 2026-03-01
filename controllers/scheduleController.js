@@ -245,7 +245,6 @@ const updateSchedule = async (req, res) => {
         }
       }
 
-      // Teacher conflict
       if (updateData.teacherId || schedule.teacherId) {
         const teacherConflict = await Schedule.findOne({
           ...conflictQuery,
