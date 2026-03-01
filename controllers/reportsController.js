@@ -12,7 +12,6 @@ const getDashboardStats = async (req, res) => {
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const todayDay = days[today.getDay()];
 
-    // Parallel queries for better performance
     const [
       totalStudents,
       totalTeachers,
