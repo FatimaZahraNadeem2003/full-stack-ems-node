@@ -289,7 +289,6 @@ const deleteCourse = async (req, res) => {
     const Grade = require('../models/Grade');
     await Grade.deleteMany({ courseId: id });
 
-    // Delete course
     await course.deleteOne();
 
     res.status(StatusCodes.OK).json({
