@@ -334,7 +334,6 @@ const getWeeklySchedule = async (req, res) => {
       ])
       .sort({ dayOfWeek: 1, startTime: 1 });
 
-    // Group by day of week
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const weeklySchedule = days.reduce((acc, day) => {
       acc[day] = schedules.filter(s => s.dayOfWeek === day);
