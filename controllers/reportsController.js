@@ -98,7 +98,6 @@ const getDashboardStats = async (req, res) => {
         }
       ]),
       
-      // Student status distribution
       Student.aggregate([
         { $group: { 
             _id: '$status', 
