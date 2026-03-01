@@ -29,7 +29,6 @@ const addCourse = async (req, res) => {
       throw new BadRequestError('Course code already exists');
     }
 
-    // If teacherId provided, verify teacher exists
     if (teacherId) {
       const teacher = await Teacher.findById(teacherId);
       if (!teacher) {
