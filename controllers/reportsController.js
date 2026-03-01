@@ -115,7 +115,6 @@ const getDashboardStats = async (req, res) => {
       ])
     ]);
 
-    // Calculate enrollment trends (last 30 days)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const enrollmentTrends = await Enrollment.aggregate([
       {
