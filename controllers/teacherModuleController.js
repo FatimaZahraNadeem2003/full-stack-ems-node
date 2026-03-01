@@ -455,7 +455,6 @@ const addRemark = async (req, res) => {
       throw new NotFoundError('Student not found');
     }
 
-    // Verify course belongs to teacher
     if (courseId) {
       const course = await Course.findOne({ _id: courseId, teacherId });
       if (!course) {
