@@ -16,7 +16,6 @@ const {
   getStudentEnrollments
 } = require('../controllers/enrollmentController');
 
-// Admin enrollment routes
 router.use('/admin', authMiddleware, adminMiddleware);
 router.post('/admin/bulk', bulkEnroll);
 router.get('/admin/student/:studentId', getStudentCourses);
@@ -28,13 +27,11 @@ router.route('/admin/:id')
   .put(updateEnrollment)
   .delete(deleteEnrollment);
 
-// Teacher enrollment routes
 router.use('/teacher', authMiddleware, teacherAuth);
 router.post('/teacher/enroll', createEnrollment);
 router.delete('/teacher/enroll/:id', deleteEnrollment);
 router.get('/teacher/my-enrollments', getAllEnrollments);
 
-// Student enrollment routes
 router.use('/student', authMiddleware, studentAuth);
 router.post('/student/enroll', selfEnroll);
 router.get('/student/enrollments', getStudentEnrollments);

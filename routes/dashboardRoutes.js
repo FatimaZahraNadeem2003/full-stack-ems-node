@@ -10,7 +10,6 @@ const {
 } = require('../controllers/dashboardController');
 
 router.use(authMiddleware);
-// Allow access for admin, teacher, or student
 router.use((req, res, next) => {
   const role = req.user.role;
   if (role === 'admin' || role === 'teacher' || role === 'student') {

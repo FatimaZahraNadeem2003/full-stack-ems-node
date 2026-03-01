@@ -7,7 +7,6 @@ const getDashboardStats = async (req, res) => {
     let stats = {};
 
     if (role === 'admin') {
-      // Admin dashboard stats with comprehensive data
       const StudentModel = require('../models').Student;
       const TeacherModel = require('../models').Teacher;
       
