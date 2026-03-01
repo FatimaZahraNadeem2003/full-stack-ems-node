@@ -372,7 +372,6 @@ const getCourseStats = async (req, res) => {
     const upcomingCourses = await Course.countDocuments({ status: 'upcoming' });
     const completedCourses = await Course.countDocuments({ status: 'completed' });
 
-    // Courses by department
     const byDepartment = await Course.aggregate([
       { $group: { _id: '$department', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
