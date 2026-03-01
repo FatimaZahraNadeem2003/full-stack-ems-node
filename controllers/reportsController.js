@@ -235,7 +235,6 @@ const getStudentsCount = async (req, res) => {
         }
       ]),
       
-      // Recent joining (last 30 days)
       Student.countDocuments({
         ...query,
         createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
