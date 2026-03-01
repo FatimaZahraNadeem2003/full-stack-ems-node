@@ -217,7 +217,6 @@ const updateCourse = async (req, res) => {
       throw new NotFoundError('Course not found');
     }
 
-    // Check if course code is being updated and already exists
     if (updateData.code && updateData.code !== course.code) {
       const existingCourse = await Course.findOne({ 
         code: updateData.code,
