@@ -23,7 +23,6 @@ const createSchedule = async (req, res) => {
       status
     } = req.body;
 
-    // Validate course exists
     const course = await Course.findById(courseId);
     if (!course) {
       throw new NotFoundError('Course not found');
