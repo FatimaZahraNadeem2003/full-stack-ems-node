@@ -310,7 +310,6 @@ const getStudentGrades = async (req, res) => {
     ])
     .sort({ createdAt: -1 });
 
-    // Calculate statistics
     const totalGrades = grades.length;
     const averagePercentage = grades.reduce((acc, g) => acc + g.percentage, 0) / totalGrades || 0;
 
