@@ -2,6 +2,51 @@ const { Course, Teacher, User, Student, Enrollment, Grade, Schedule, Remark } = 
 const { BadRequestError, NotFoundError, UnauthorizedError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
+const getTeacherDashboardStats = async (req, res) => {
+  try {
+    const teacherId = req.user.teacherId;
+
+    const courses = await Course.find({ teacherId, status: { $ne: 'completed' } });
+    
+    let totalStudents = 0;
+    for (const course of courses) {
+      const count = await Enrollment.countDocuments({
+        courseId: course._id,
+        status: 'enrolled'
+      });
+      totalStudents += count;
+    }
+
+    const today = new Date();
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const todayDay = days[today.getDay()];
+    
+    const todayClasses = await Schedule.countDocuments({
+      teacherId,
+      dayOfWeek: todayDay,
+      status: 'scheduled'
+    });
+
+    const pendingGrades = await Grade.countDocuments({
+      teacherId,
+      grade: { $in: [null, 'Not Graded'] }
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        totalCourses: courses.length,
+        totalStudents,
+        todayClasses,
+        pendingGrades
+      }
+    });
+  } catch (error) {
+    console.error('Get teacher dashboard stats error:', error);
+    throw error;
+  }
+};
+
 const getTeacherCourses = async (req, res) => {
   try {
     const teacherId = req.user.teacherId;
@@ -20,9 +65,15 @@ const getTeacherCourses = async (req, res) => {
           status: 'enrolled'
         });
 
+        const schedule = await Schedule.find({
+          courseId: course._id,
+          status: 'scheduled'
+        }).select('dayOfWeek startTime endTime room');
+
         return {
           ...course.toObject(),
-          enrolledCount
+          enrolledCount,
+          schedule
         };
       })
     );
@@ -37,6 +88,50 @@ const getTeacherCourses = async (req, res) => {
     throw error;
   }
 };
+
+
+const getCourseDetails = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const teacherId = req.user.teacherId;
+
+    const course = await Course.findOne({ _id: courseId, teacherId })
+      .populate({
+        path: 'teacherId',
+        populate: {
+          path: 'userId',
+          select: 'firstName lastName email'
+        }
+      });
+
+    if (!course) {
+      throw new NotFoundError('Course not found');
+    }
+
+    const enrolledCount = await Enrollment.countDocuments({
+      courseId,
+      status: 'enrolled'
+    });
+
+    const schedule = await Schedule.find({
+      courseId,
+      status: 'scheduled'
+    }).sort({ dayOfWeek: 1, startTime: 1 });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        ...course.toObject(),
+        enrolledCount,
+        schedule
+      }
+    });
+  } catch (error) {
+    console.error('Get course details error:', error);
+    throw error;
+  }
+};
+
 
 const getCourseStudents = async (req, res) => {
   try {
@@ -152,6 +247,7 @@ const addGrade = async (req, res) => {
   }
 };
 
+
 const updateGrade = async (req, res) => {
   try {
     const { id } = req.params;
@@ -192,6 +288,7 @@ const updateGrade = async (req, res) => {
     throw error;
   }
 };
+
 
 const getCourseGrades = async (req, res) => {
   try {
@@ -327,15 +424,12 @@ const getStudentGrades = async (req, res) => {
   }
 };
 
+
 const getTeacherSchedule = async (req, res) => {
   try {
     const teacherId = req.user.teacherId;
-    const { weekStart } = req.query;
 
-    const query = { teacherId, status: 'scheduled' };
-    
-
-    const schedules = await Schedule.find(query)
+    const schedules = await Schedule.find({ teacherId, status: 'scheduled' })
       .populate({
         path: 'courseId',
         select: 'name code credits'
@@ -358,6 +452,7 @@ const getTeacherSchedule = async (req, res) => {
     throw error;
   }
 };
+
 
 const updateSchedule = async (req, res) => {
   try {
@@ -399,6 +494,7 @@ const updateSchedule = async (req, res) => {
     throw error;
   }
 };
+
 
 const addRemark = async (req, res) => {
   try {
@@ -495,7 +591,9 @@ const getStudentRemarks = async (req, res) => {
 };
 
 module.exports = {
+  getTeacherDashboardStats,
   getTeacherCourses,
+  getCourseDetails,
   getCourseStudents,
   addGrade,
   updateGrade,

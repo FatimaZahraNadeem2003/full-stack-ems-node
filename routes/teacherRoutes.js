@@ -3,7 +3,9 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authentication');
 const { teacherAuth } = require('../middleware/authorization');
 const {
+  getTeacherDashboardStats,
   getTeacherCourses,
+  getCourseDetails,
   getCourseStudents,
   addGrade,
   updateGrade,
@@ -18,7 +20,10 @@ const {
 router.use(authMiddleware);
 router.use(teacherAuth);
 
+router.get('/dashboard/stats', getTeacherDashboardStats);
+
 router.get('/courses', getTeacherCourses);
+router.get('/courses/:courseId', getCourseDetails);
 router.get('/courses/:courseId/students', getCourseStudents);
 
 router.post('/grades', addGrade);
