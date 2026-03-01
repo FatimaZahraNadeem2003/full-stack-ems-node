@@ -310,7 +310,6 @@ const getStudentCourses = async (req, res) => {
     const completedCourses = enrollments.filter(e => e.status === 'completed').length;
     const inProgressCourses = enrollments.filter(e => e.status === 'enrolled').length;
     
-    // Calculate average progress
     const avgProgress = enrollments.reduce((acc, e) => acc + (e.progress || 0), 0) / totalCourses || 0;
 
     res.status(StatusCodes.OK).json({
