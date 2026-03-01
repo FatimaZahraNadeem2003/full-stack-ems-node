@@ -20,7 +20,6 @@ const createEnrollment = async (req, res) => {
       remarks
     } = req.body;
 
-    // Validate student exists
     const student = await Student.findById(studentId).populate({
       path: 'userId',
       select: 'firstName lastName email'
@@ -29,13 +28,11 @@ const createEnrollment = async (req, res) => {
       throw new NotFoundError('Student not found');
     }
 
-    // Validate course exists
     const course = await Course.findById(courseId);
     if (!course) {
       throw new NotFoundError('Course not found');
     }
 
-    // Check if already enrolled
     const existingEnrollment = await Enrollment.findOne({
       studentId,
       courseId,
