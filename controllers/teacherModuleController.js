@@ -313,7 +313,6 @@ const getStudentGrades = async (req, res) => {
     const totalGrades = grades.length;
     const averagePercentage = grades.reduce((acc, g) => acc + g.percentage, 0) / totalGrades || 0;
 
-    // Group by course
     const byCourse = grades.reduce((acc, grade) => {
       const courseId = grade.courseId._id.toString();
       if (!acc[courseId]) {
