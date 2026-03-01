@@ -6,7 +6,32 @@ const getDashboardStats = async (req, res) => {
     const role = req.user.role;
     let stats = {};
 
-    if (role === 'teacher') {
+    if (role === 'admin') {
+      // Admin dashboard stats
+      const [
+        totalStudents,
+        totalTeachers,
+        totalCourses,
+        totalEnrollments
+      ] = await Promise.all([
+        require('../models').Student.countDocuments(),
+        require('../models').Teacher.countDocuments(),
+        require('../models').Course.countDocuments(),
+        require('../models').Enrollment.countDocuments()
+      ]);
+
+      stats = {
+        totalStudents,
+        totalTeachers,
+        totalCourses,
+        totalEnrollments,
+        activeEnrollments: await Enrollment.countDocuments({ status: 'enrolled' }),
+        todayClasses: await Schedule.countDocuments({
+          status: 'scheduled',
+          dayOfWeek: new Date().toLocaleString('en-US', { weekday: 'long' }).toLowerCase()
+        })
+      };
+    } else if (role === 'teacher') {
       const teacherId = req.user.teacherId;
       const courses = await Course.find({ teacherId });
       const courseIds = courses.map(c => c._id);
@@ -42,7 +67,10 @@ const getDashboardStats = async (req, res) => {
     });
   } catch (error) {
     console.error('Get dashboard stats error:', error);
-    throw error;
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Error fetching dashboard stats'
+    });
   }
 };
 
