@@ -90,7 +90,6 @@ const getAllCourses = async (req, res) => {
       teacherId 
     } = req.query;
 
-    // Build query
     const query = {};
     if (department) query.department = { $regex: department, $options: 'i' };
     if (level) query.level = level;
