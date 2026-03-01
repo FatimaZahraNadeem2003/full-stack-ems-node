@@ -220,7 +220,6 @@ const updateSchedule = async (req, res) => {
       throw new NotFoundError('Schedule not found');
     }
 
-    // Check for conflicts if time/room/teacher changed
     if (updateData.dayOfWeek || updateData.startTime || updateData.endTime || 
         updateData.room || updateData.teacherId) {
       
