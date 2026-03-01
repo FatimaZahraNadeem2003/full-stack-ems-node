@@ -369,8 +369,6 @@ const getTeacherSchedule = async (req, res) => {
 
     const query = { teacherId, status: 'scheduled' };
     
-    // If weekStart provided, filter by semester/academic year
-    // For simplicity, getting all active schedules
 
     const schedules = await Schedule.find(query)
       .populate({
@@ -379,7 +377,6 @@ const getTeacherSchedule = async (req, res) => {
       })
       .sort({ dayOfWeek: 1, startTime: 1 });
 
-    // Group by day of week
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const groupedSchedule = days.reduce((acc, day) => {
       acc[day] = schedules.filter(s => s.dayOfWeek === day);
@@ -413,12 +410,10 @@ const updateSchedule = async (req, res) => {
       throw new NotFoundError('Schedule not found');
     }
 
-    // Verify schedule belongs to teacher
     if (schedule.teacherId.toString() !== teacherId) {
       throw new UnauthorizedError('You are not authorized to update this schedule');
     }
 
-    // Only allow updating specific fields
     const allowedUpdates = {
       status: updateData.status,
       room: updateData.room,
