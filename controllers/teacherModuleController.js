@@ -124,7 +124,6 @@ const addGrade = async (req, res) => {
       throw new UnauthorizedError('You are not authorized to grade this course');
     }
 
-    // Verify student is enrolled in course
     const enrollment = await Enrollment.findOne({
       studentId,
       courseId,
