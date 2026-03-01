@@ -191,7 +191,6 @@ const getStudentsCount = async (req, res) => {
   try {
     const { status, class: className, section } = req.query;
 
-    // Build query
     const query = {};
     if (status) query.status = status;
     if (className) query.class = className;
@@ -207,19 +206,14 @@ const getStudentsCount = async (req, res) => {
       byGender,
       recentJoining
     ] = await Promise.all([
-      // Total students
       Student.countDocuments(query),
       
-      // Active students
       Student.countDocuments({ ...query, status: 'active' }),
       
-      // Inactive students
       Student.countDocuments({ ...query, status: 'inactive' }),
       
-      // Graduated students
       Student.countDocuments({ ...query, status: 'graduated' }),
       
-      // Suspended students
       Student.countDocuments({ ...query, status: 'suspended' }),
       
       // Students by class
