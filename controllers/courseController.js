@@ -177,7 +177,6 @@ const getCourseById = async (req, res) => {
       status: 'enrolled'
     });
 
-    // Get enrolled students list (optional)
     const enrolledStudents = await Enrollment.find({ 
       courseId: id,
       status: 'enrolled'
