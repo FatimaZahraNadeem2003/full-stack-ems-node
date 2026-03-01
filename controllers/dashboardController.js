@@ -7,32 +7,141 @@ const getDashboardStats = async (req, res) => {
     let stats = {};
 
     if (role === 'admin') {
-      // Admin dashboard stats
+      // Admin dashboard stats with comprehensive data
       const StudentModel = require('../models').Student;
       const TeacherModel = require('../models').Teacher;
+      
+      const today = new Date();
+      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const todayDay = days[today.getDay()];
       
       const [
         totalStudents,
         totalTeachers,
         totalCourses,
-        totalEnrollments
+        totalEnrollments,
+        activeCourses,
+        activeEnrollments,
+        todayClasses,
+        recentEnrollments,
+        popularCourses,
+        studentStatus,
+        courseStatus
       ] = await Promise.all([
         StudentModel.countDocuments(),
         TeacherModel.countDocuments(),
         Course.countDocuments(),
-        Enrollment.countDocuments()
+        Enrollment.countDocuments(),
+        Course.countDocuments({ status: 'active' }),
+        Enrollment.countDocuments({ status: 'enrolled' }),
+        Schedule.find({ 
+          dayOfWeek: todayDay,
+          status: 'scheduled'
+        })
+        .populate([
+          { 
+            path: 'courseId', 
+            select: 'name code credits' 
+          },
+          { 
+            path: 'teacherId',
+            populate: {
+              path: 'userId',
+              select: 'firstName lastName'
+            }
+          }
+        ])
+        .sort({ startTime: 1 }),
+        
+        Enrollment.find({
+          createdAt: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+        })
+        .populate([
+          { 
+            path: 'studentId',
+            populate: {
+              path: 'userId',
+              select: 'firstName lastName'
+            }
+          },
+          { path: 'courseId', select: 'name code' }
+        ])
+        .sort({ createdAt: -1 })
+        .limit(10),
+        
+        Enrollment.aggregate([
+          { $match: { status: 'enrolled' } },
+          { $group: { 
+              _id: '$courseId', 
+              count: { $sum: 1 } 
+            } 
+          },
+          { $sort: { count: -1 } },
+          { $limit: 5 },
+          { $lookup: {
+              from: 'courses',
+              localField: '_id',
+              foreignField: '_id',
+              as: 'course'
+            }
+          },
+          { $unwind: '$course' },
+          { $project: {
+              'course.name': 1,
+              'course.code': 1,
+              'course.department': 1,
+              count: 1
+            }
+          }
+        ]),
+        
+        StudentModel.aggregate([
+          { $group: { 
+              _id: '$status', 
+              count: { $sum: 1 } 
+            } 
+          }
+        ]),
+        
+        Course.aggregate([
+          { $group: { 
+              _id: '$status', 
+              count: { $sum: 1 } 
+            } 
+          }
+        ])
       ]);
 
+      const completedEnrollments = await Enrollment.countDocuments({ 
+        status: 'completed' 
+      });
+      const completionRate = totalEnrollments > 0 
+        ? ((completedEnrollments / totalEnrollments) * 100).toFixed(1)
+        : 0;
+
+      const avgStudentsPerCourse = totalCourses > 0
+        ? (totalEnrollments / totalCourses).toFixed(1)
+        : 0;
+
       stats = {
-        totalStudents,
-        totalTeachers,
-        totalCourses,
-        totalEnrollments,
-        activeEnrollments: await Enrollment.countDocuments({ status: 'enrolled' }),
-        todayClasses: await Schedule.countDocuments({
-          status: 'scheduled',
-          dayOfWeek: new Date().toLocaleString('en-US', { weekday: 'long' }).toLowerCase()
-        })
+        overview: {
+          totalStudents,
+          totalTeachers,
+          totalCourses,
+          totalEnrollments,
+          activeCourses,
+          activeEnrollments,
+          completionRate: parseFloat(completionRate),
+          avgStudentsPerCourse: parseFloat(avgStudentsPerCourse)
+        },
+        todayClasses: {
+          count: todayClasses.length,
+          classes: todayClasses
+        },
+        popularCourses,
+        recentActivity: {
+          enrollments: recentEnrollments
+        }
       };
     } else if (role === 'teacher') {
       const teacherId = req.user.teacherId;
