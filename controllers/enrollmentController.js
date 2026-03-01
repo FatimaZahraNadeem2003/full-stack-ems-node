@@ -362,7 +362,6 @@ const bulkEnroll = async (req, res) => {
 
     for (const studentId of studentIds) {
       try {
-        // Check if already enrolled
         const existing = await Enrollment.findOne({
           studentId,
           courseId,
@@ -377,7 +376,6 @@ const bulkEnroll = async (req, res) => {
           continue;
         }
 
-        // Check capacity
         const enrolledCount = await Enrollment.countDocuments({
           courseId,
           status: 'enrolled'
@@ -391,7 +389,6 @@ const bulkEnroll = async (req, res) => {
           continue;
         }
 
-        // Create enrollment
         const enrollment = await Enrollment.create({
           studentId,
           courseId,
