@@ -29,7 +29,16 @@ const courseRoutes = require('./routes/courseRoutes');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const reportsRoutes = require('./routes/reportsRoutes');
+const teacherRoutes = require('./routes/teacherRoutes');
+const studentRoutes = require('./routes/studentRoutes');
 
+const accountRoutes = require('./routes/accountRoutes');
+const calendarRoutes = require('./routes/calendarRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const libraryRoutes = require('./routes/libraryRoutes');
+const feeRoutes = require('./routes/feeRoutes');
 
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
@@ -62,6 +71,16 @@ app.use("/api/admin/courses", courseRoutes);
 app.use("/api/admin/schedules", scheduleRoutes);
 app.use("/api/admin/enrollments", enrollmentRoutes);
 app.use("/api/admin/reports", reportsRoutes);
+app.use("/api/teacher", teacherRoutes);
+app.use("/api/student", studentRoutes);
+
+app.use("/api/account", accountRoutes);
+app.use("/api/calendar", calendarRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/library", libraryRoutes);
+app.use("/api/fees", feeRoutes);
 
 app.use("/api/v1/test", testRoutes);
 

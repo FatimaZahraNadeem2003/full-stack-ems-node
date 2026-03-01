@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authentication');
-const { studentMiddleware } = require('../middleware/authorization');
+const { studentAuth } = require('../middleware/authorization');
 const {
   getStudentProfile,
   updateStudentProfile,
@@ -14,7 +14,7 @@ const {
 } = require('../controllers/studentModuleController');
 
 router.use(authMiddleware);
-router.use(studentMiddleware);
+router.use(studentAuth);
 
 router.get('/profile', getStudentProfile);
 router.put('/profile', updateStudentProfile);
