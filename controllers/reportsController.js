@@ -106,7 +106,6 @@ const getDashboardStats = async (req, res) => {
         }
       ]),
       
-      // Course status distribution
       Course.aggregate([
         { $group: { 
             _id: '$status', 
