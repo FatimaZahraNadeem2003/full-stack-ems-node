@@ -171,7 +171,6 @@ const getCourseById = async (req, res) => {
       throw new NotFoundError('Course not found');
     }
 
-    // Get enrollment count
     const Enrollment = require('../models/Enrollment');
     const enrolledCount = await Enrollment.countDocuments({ 
       courseId: id,
