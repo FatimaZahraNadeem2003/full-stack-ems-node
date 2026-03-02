@@ -14,7 +14,9 @@ const {
   getTeacherSchedule,
   updateSchedule,
   addRemark,
-  getStudentRemarks
+  getStudentRemarks,
+  getTeacherProfile,
+  updateTeacherProfile
 } = require('../controllers/teacherModuleController');
 
 router.use(authMiddleware);
