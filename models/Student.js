@@ -14,6 +14,11 @@ const StudentSchema = new mongoose.Schema({
         type: String,
         enum: ['male', 'female', 'other']
     },
+    age: {
+        type: Number,
+        min: 1,
+        max: 100
+    },
     contactNumber: {
         type: String
     },
@@ -31,11 +36,11 @@ const StudentSchema = new mongoose.Schema({
         type: String
     },
     class: {
-        type: String,  
+        type: String,
         required: true
     },
     section: {
-        type: String  
+        type: String
     },
     rollNumber: {
         type: String,
@@ -52,13 +57,13 @@ const StudentSchema = new mongoose.Schema({
         default: 'active'
     },
     profilePicture: {
-        type: String  
+        type: String
     }
 }, {
     timestamps: true
 });
 
-StudentSchema.virtual('fullName').get(function() {
+StudentSchema.virtual('fullName').get(function () {
     return this.userId ? `${this.userId.firstName} ${this.userId.lastName}` : '';
 });
 
