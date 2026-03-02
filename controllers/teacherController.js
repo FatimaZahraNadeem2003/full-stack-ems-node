@@ -299,67 +299,7 @@ const getTeacherStats = async (req, res) => {
   }
 };
 
-const getTeacherProfile = async (req, res) => {
-  try {
-    const teacherId = req.user.teacherId;
-    
-    const teacher = await Teacher.findById(teacherId)
-      .populate({
-        path: 'userId',
-        select: '-password'
-      });
 
-    if (!teacher) {
-      throw new NotFoundError('Teacher not found');
-    }
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      data: teacher
-    });
-  } catch (error) {
-    console.error('Get teacher profile error:', error);
-    throw error;
-  }
-};
-
-const updateTeacherProfile = async (req, res) => {
-  try {
-    const teacherId = req.user.teacherId;
-    const updateData = req.body;
-
-    const allowedUpdates = {
-      contactNumber: updateData.contactNumber,
-      emergencyContact: updateData.emergencyContact,
-      dateOfBirth: updateData.dateOfBirth,
-      gender: updateData.gender,
-      address: updateData.address,
-      bio: updateData.bio
-    };
-
-    Object.keys(allowedUpdates).forEach(key => 
-      allowedUpdates[key] === undefined && delete allowedUpdates[key]
-    );
-
-    const updatedTeacher = await Teacher.findByIdAndUpdate(
-      teacherId,
-      allowedUpdates,
-      { new: true, runValidators: true }
-    ).populate({
-      path: 'userId',
-      select: '-password'
-    });
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: updatedTeacher
-    });
-  } catch (error) {
-    console.error('Update teacher profile error:', error);
-    throw error;
-  }
-};
 
 module.exports = {
   addTeacher,
@@ -367,6 +307,5 @@ module.exports = {
   getTeacherById,
   updateTeacher,
   deleteTeacher,
-  getTeacherStats,
-  updateTeacherProfile
+  getTeacherStats
 };
