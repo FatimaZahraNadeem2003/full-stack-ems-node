@@ -2,6 +2,38 @@ const { Schedule, Course, Teacher } = require('../models');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
+const resolveTeacherId = async (teacherIdentifier) => {
+  if (!teacherIdentifier) return null;
+  const isValidObjectId = teacherIdentifier.match(/^[0-9a-fA-F]{24}$/);
+  if (isValidObjectId) {
+    return teacherIdentifier;
+  } else {
+    const teacher = await Teacher.findOne({ 
+      $or: [
+        { employeeId: teacherIdentifier },
+        { 'userId.email': teacherIdentifier }
+      ]
+    });
+    return teacher?._id;
+  }
+};
+
+const resolveCourseId = async (courseIdentifier) => {
+  if (!courseIdentifier) return null;
+  const isValidObjectId = courseIdentifier.match(/^[0-9a-fA-F]{24}$/);
+  if (isValidObjectId) {
+    return courseIdentifier;
+  } else {
+    const course = await Course.findOne({ 
+      $or: [
+        { code: courseIdentifier },
+        { name: { $regex: courseIdentifier, $options: 'i' } }
+      ]
+    });
+    return course?._id;
+  }
+};
+
 const createSchedule = async (req, res) => {
   try {
     const {
@@ -113,11 +145,41 @@ const getAllSchedules = async (req, res) => {
 
     const query = {};
     if (dayOfWeek) query.dayOfWeek = dayOfWeek;
-    if (courseId) query.courseId = courseId;
-    if (teacherId) query.teacherId = teacherId;
     if (semester) query.semester = semester;
     if (academicYear) query.academicYear = academicYear;
     if (status) query.status = status;
+
+    if (courseId) {
+      const resolvedCourseId = await resolveCourseId(courseId);
+      if (resolvedCourseId) {
+        query.courseId = resolvedCourseId;
+      } else {
+        return res.status(StatusCodes.OK).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: parseInt(page),
+          pages: 0,
+          data: []
+        });
+      }
+    }
+
+    if (teacherId) {
+      const resolvedTeacherId = await resolveTeacherId(teacherId);
+      if (resolvedTeacherId) {
+        query.teacherId = resolvedTeacherId;
+      } else {
+        return res.status(StatusCodes.OK).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: parseInt(page),
+          pages: 0,
+          data: []
+        });
+      }
+    }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -285,11 +347,25 @@ const deleteSchedule = async (req, res) => {
 
 const getWeeklySchedule = async (req, res) => {
   try {
-    const { weekStart, semester, academicYear } = req.query;
+    const { weekStart, semester, academicYear, teacherId, courseId } = req.query;
 
     const query = {};
     if (semester) query.semester = semester;
     if (academicYear) query.academicYear = academicYear;
+
+    if (teacherId) {
+      const resolvedTeacherId = await resolveTeacherId(teacherId);
+      if (resolvedTeacherId) {
+        query.teacherId = resolvedTeacherId;
+      }
+    }
+
+    if (courseId) {
+      const resolvedCourseId = await resolveCourseId(courseId);
+      if (resolvedCourseId) {
+        query.courseId = resolvedCourseId;
+      }
+    }
 
     const schedules = await Schedule.find(query)
       .populate([

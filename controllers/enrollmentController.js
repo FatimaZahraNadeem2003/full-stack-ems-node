@@ -2,6 +2,38 @@ const { Enrollment, Student, Course, User } = require('../models');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
+const resolveStudentId = async (studentIdentifier) => {
+  if (!studentIdentifier) return null;
+  const isValidObjectId = studentIdentifier.match(/^[0-9a-fA-F]{24}$/);
+  if (isValidObjectId) {
+    return studentIdentifier;
+  } else {
+    const student = await Student.findOne({ 
+      $or: [
+        { rollNumber: studentIdentifier },
+        { 'userId.email': studentIdentifier }
+      ]
+    }).populate('userId');
+    return student?._id;
+  }
+};
+
+const resolveCourseId = async (courseIdentifier) => {
+  if (!courseIdentifier) return null;
+  const isValidObjectId = courseIdentifier.match(/^[0-9a-fA-F]{24}$/);
+  if (isValidObjectId) {
+    return courseIdentifier;
+  } else {
+    const course = await Course.findOne({ 
+      $or: [
+        { code: courseIdentifier },
+        { name: { $regex: courseIdentifier, $options: 'i' } }
+      ]
+    });
+    return course?._id;
+  }
+};
+
 const createEnrollment = async (req, res) => {
   try {
     const {
@@ -92,9 +124,39 @@ const getAllEnrollments = async (req, res) => {
     } = req.query;
 
     const query = {};
-    if (studentId) query.studentId = studentId;
-    if (courseId) query.courseId = courseId;
     if (status) query.status = status;
+
+    if (studentId) {
+      const resolvedStudentId = await resolveStudentId(studentId);
+      if (resolvedStudentId) {
+        query.studentId = resolvedStudentId;
+      } else {
+        return res.status(StatusCodes.OK).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: parseInt(page),
+          pages: 0,
+          data: []
+        });
+      }
+    }
+
+    if (courseId) {
+      const resolvedCourseId = await resolveCourseId(courseId);
+      if (resolvedCourseId) {
+        query.courseId = resolvedCourseId;
+      } else {
+        return res.status(StatusCodes.OK).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: parseInt(page),
+          pages: 0,
+          data: []
+        });
+      }
+    }
 
     if (search) {
       const users = await User.find({
@@ -253,12 +315,17 @@ const getStudentCourses = async (req, res) => {
     const { studentId } = req.params;
     const { status } = req.query;
 
-    const student = await Student.findById(studentId);
+    const resolvedStudentId = await resolveStudentId(studentId);
+    if (!resolvedStudentId) {
+      throw new NotFoundError('Student not found');
+    }
+
+    const student = await Student.findById(resolvedStudentId);
     if (!student) {
       throw new NotFoundError('Student not found');
     }
 
-    const query = { studentId };
+    const query = { studentId: resolvedStudentId };
     if (status) query.status = status;
 
     const enrollments = await Enrollment.find(query)
@@ -315,7 +382,12 @@ const bulkEnroll = async (req, res) => {
       throw new BadRequestError('Course ID and student IDs array are required');
     }
 
-    const course = await Course.findById(courseId);
+    const resolvedCourseId = await resolveCourseId(courseId);
+    if (!resolvedCourseId) {
+      throw new NotFoundError('Course not found');
+    }
+
+    const course = await Course.findById(resolvedCourseId);
     if (!course) {
       throw new NotFoundError('Course not found');
     }
@@ -325,48 +397,57 @@ const bulkEnroll = async (req, res) => {
       failed: []
     };
 
-    for (const studentId of studentIds) {
+    for (const studentIdentifier of studentIds) {
       try {
+        const resolvedStudentId = await resolveStudentId(studentIdentifier);
+        if (!resolvedStudentId) {
+          results.failed.push({
+            studentId: studentIdentifier,
+            reason: 'Student not found'
+          });
+          continue;
+        }
+
         const existing = await Enrollment.findOne({
-          studentId,
-          courseId,
+          studentId: resolvedStudentId,
+          courseId: resolvedCourseId,
           status: { $in: ['enrolled', 'completed'] }
         });
 
         if (existing) {
           results.failed.push({
-            studentId,
+            studentId: studentIdentifier,
             reason: 'Already enrolled'
           });
           continue;
         }
 
         const enrolledCount = await Enrollment.countDocuments({
-          courseId,
+          courseId: resolvedCourseId,
           status: 'enrolled'
         });
 
         if (enrolledCount >= course.maxStudents) {
           results.failed.push({
-            studentId,
+            studentId: studentIdentifier,
             reason: 'Course full'
           });
           continue;
         }
 
         const enrollment = await Enrollment.create({
-          studentId,
-          courseId,
+          studentId: resolvedStudentId,
+          courseId: resolvedCourseId,
           status: 'enrolled'
         });
 
         results.successful.push({
-          studentId,
+          studentId: studentIdentifier,
           enrollmentId: enrollment._id
         });
       } catch (error) {
         results.failed.push({
-          studentId,
+          studentId: studentIdentifier,
           reason: error.message
         });
       }
@@ -392,6 +473,11 @@ const selfEnroll = async (req, res) => {
       throw new BadRequestError('Course ID is required');
     }
 
+    const resolvedCourseId = await resolveCourseId(courseId);
+    if (!resolvedCourseId) {
+      throw new NotFoundError('Course not found');
+    }
+
     const student = await Student.findById(studentId).populate({
       path: 'userId',
       select: 'firstName lastName email'
@@ -400,14 +486,14 @@ const selfEnroll = async (req, res) => {
       throw new NotFoundError('Student not found');
     }
 
-    const course = await Course.findById(courseId);
+    const course = await Course.findById(resolvedCourseId);
     if (!course) {
       throw new NotFoundError('Course not found');
     }
 
     const existingEnrollment = await Enrollment.findOne({
       studentId,
-      courseId,
+      courseId: resolvedCourseId,
       status: { $in: ['enrolled', 'completed'] }
     });
 
@@ -416,7 +502,7 @@ const selfEnroll = async (req, res) => {
     }
 
     const enrolledCount = await Enrollment.countDocuments({
-      courseId,
+      courseId: resolvedCourseId,
       status: 'enrolled'
     });
 
@@ -426,7 +512,7 @@ const selfEnroll = async (req, res) => {
 
     const enrollment = await Enrollment.create({
       studentId,
-      courseId,
+      courseId: resolvedCourseId,
       enrollmentDate: Date.now(),
       status: 'enrolled',
       progress: 0

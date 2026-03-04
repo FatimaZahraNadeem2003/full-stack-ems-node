@@ -19,8 +19,7 @@ const CourseSchema = new mongoose.Schema({
     },
     teacherId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Teacher',
-        required: true
+        ref: 'Teacher'
     },
     credits: {
         type: Number,
@@ -29,7 +28,7 @@ const CourseSchema = new mongoose.Schema({
         max: 6
     },
     duration: {
-        type: String,  
+        type: String,
         required: true
     },
     department: {
@@ -42,10 +41,10 @@ const CourseSchema = new mongoose.Schema({
         default: 'beginner'
     },
     syllabus: {
-        type: String  
+        type: String
     },
     prerequisites: [{
-        type: String  
+        type: String
     }],
     maxStudents: {
         type: Number,

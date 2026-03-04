@@ -81,7 +81,7 @@ const getAllStudents = async (req, res) => {
     if (studentClass) query.class = studentClass;
     if (status) query.status = status;
 
-    if (search) {
+    if (search && search.trim() !== '') {
       const users = await User.find({
         role: 'student',
         $or: [
@@ -89,7 +89,7 @@ const getAllStudents = async (req, res) => {
           { lastName: { $regex: search, $options: 'i' } },
           { email: { $regex: search, $options: 'i' } }
         ]
-      }).select('_id');
+      }).select('_id').limit(100);
       
       const userIds = users.map(u => u._id);
       if (userIds.length > 0) {
@@ -97,7 +97,7 @@ const getAllStudents = async (req, res) => {
       } else {
         const studentsByRoll = await Student.find({
           rollNumber: { $regex: search, $options: 'i' }
-        }).select('_id');
+        }).select('_id').limit(100);
         
         if (studentsByRoll.length > 0) {
           query._id = { $in: studentsByRoll.map(s => s._id) };
@@ -123,7 +123,8 @@ const getAllStudents = async (req, res) => {
       })
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .lean();
 
     const total = await Student.countDocuments(query);
 

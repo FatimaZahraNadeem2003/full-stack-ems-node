@@ -2,6 +2,21 @@ const { Course, Teacher, User } = require('../models');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
+const resolveTeacherId = async (teacherIdentifier) => {
+  if (!teacherIdentifier) return null;
+  const isValidObjectId = teacherIdentifier.match(/^[0-9a-fA-F]{24}$/);
+  if (isValidObjectId) {
+    return teacherIdentifier;
+  } else {
+    const teacher = await Teacher.findOne({ 
+      $or: [
+        { employeeId: teacherIdentifier },
+        { 'userId.email': teacherIdentifier }
+      ]
+    });
+    return teacher?._id;
+  }
+};
 
 const addCourse = async (req, res) => {
   try {
@@ -26,8 +41,8 @@ const addCourse = async (req, res) => {
     }
 
     if (teacherId) {
-      const teacher = await Teacher.findById(teacherId);
-      if (!teacher) {
+      const resolvedTeacherId = await resolveTeacherId(teacherId);
+      if (!resolvedTeacherId) {
         throw new NotFoundError('Teacher not found');
       }
     }
@@ -36,7 +51,7 @@ const addCourse = async (req, res) => {
       name,
       code,
       description,
-      teacherId,
+      teacherId: teacherId ? await resolveTeacherId(teacherId) : undefined,
       credits,
       duration,
       department,
@@ -69,7 +84,6 @@ const addCourse = async (req, res) => {
   }
 };
 
-
 const getAllCourses = async (req, res) => {
   try {
     const { 
@@ -86,7 +100,22 @@ const getAllCourses = async (req, res) => {
     if (department) query.department = { $regex: department, $options: 'i' };
     if (level) query.level = level;
     if (status) query.status = status;
-    if (teacherId) query.teacherId = teacherId;
+
+    if (teacherId) {
+      const resolvedTeacherId = await resolveTeacherId(teacherId);
+      if (resolvedTeacherId) {
+        query.teacherId = resolvedTeacherId;
+      } else {
+        return res.status(StatusCodes.OK).json({
+          success: true,
+          count: 0,
+          total: 0,
+          page: parseInt(page),
+          pages: 0,
+          data: []
+        });
+      }
+    }
 
     if (search) {
       query.$or = [
@@ -140,7 +169,6 @@ const getAllCourses = async (req, res) => {
     throw error;
   }
 };
-
 
 const getCourseById = async (req, res) => {
   try {
@@ -211,10 +239,11 @@ const updateCourse = async (req, res) => {
     }
 
     if (updateData.teacherId) {
-      const teacher = await Teacher.findById(updateData.teacherId);
-      if (!teacher) {
+      const resolvedTeacherId = await resolveTeacherId(updateData.teacherId);
+      if (!resolvedTeacherId) {
         throw new NotFoundError('Teacher not found');
       }
+      updateData.teacherId = resolvedTeacherId;
     }
 
     const updatedCourse = await Course.findByIdAndUpdate(
@@ -279,7 +308,6 @@ const deleteCourse = async (req, res) => {
   }
 };
 
-
 const assignTeacher = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -289,12 +317,17 @@ const assignTeacher = async (req, res) => {
       throw new BadRequestError('Teacher ID is required');
     }
 
+    const resolvedTeacherId = await resolveTeacherId(teacherId);
+    if (!resolvedTeacherId) {
+      throw new NotFoundError('Teacher not found');
+    }
+
     const course = await Course.findById(courseId);
     if (!course) {
       throw new NotFoundError('Course not found');
     }
 
-    const teacher = await Teacher.findById(teacherId).populate({
+    const teacher = await Teacher.findById(resolvedTeacherId).populate({
       path: 'userId',
       select: 'firstName lastName email'
     });
@@ -303,7 +336,7 @@ const assignTeacher = async (req, res) => {
       throw new NotFoundError('Teacher not found');
     }
 
-    course.teacherId = teacherId;
+    course.teacherId = resolvedTeacherId;
     await course.save();
 
     const updatedCourse = await Course.findById(courseId)

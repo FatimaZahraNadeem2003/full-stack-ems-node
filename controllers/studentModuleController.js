@@ -1,4 +1,4 @@
-const { Student, User, Course, Enrollment, Grade, Schedule, Remark } = require('../models');
+const { Student, User, Course, Enrollment, Grade, Schedule } = require('../models');
 const { BadRequestError, NotFoundError } = require('../errors');
 const { StatusCodes } = require('http-status-codes');
 
@@ -126,7 +126,8 @@ const getStudentCourses = async (req, res) => {
         }
       }
     })
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
     const courses = enrollments.map(enrollment => ({
       _id: enrollment.courseId?._id,
@@ -183,11 +184,6 @@ const getStudentCourseDetails = async (req, res) => {
 
     const grades = await Grade.find({ studentId, courseId })
       .sort({ createdAt: -1 });
-
-    const today = new Date();
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const currentDay = days[today.getDay()];
-    const currentTime = today.toTimeString().slice(0, 5);
 
     const schedules = await Schedule.find({
       courseId,
@@ -482,8 +478,6 @@ const getStudentProgress = async (req, res) => {
       ? (completedCourses / enrollments.length) * 100 
       : 0;
 
-    const upcomingDeadlines = [];
-
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
@@ -499,7 +493,7 @@ const getStudentProgress = async (req, res) => {
           recentGrades: grades.slice(0, 5)
         },
         courses: courseProgress,
-        upcomingDeadlines
+        upcomingDeadlines: []
       }
     });
   } catch (error) {
@@ -522,7 +516,8 @@ const getAvailableCourses = async (req, res) => {
         select: 'firstName lastName'
       }
     })
-    .select('name code description credits department level duration maxStudents status teacherId');
+    .select('name code description credits department level duration maxStudents status teacherId')
+    .limit(100);
 
     const enrollments = await Enrollment.find({ 
       studentId,
