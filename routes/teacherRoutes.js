@@ -28,7 +28,6 @@ const {
   getTeacherStats
 } = require('../controllers/teacherController');
 
-// Teacher-specific routes (require teacher authentication)
 router.use(authMiddleware);
 router.use(teacherAuth);
 
@@ -52,7 +51,6 @@ router.get('/remarks/student/:studentId', getStudentRemarks);
 router.get('/profile', getTeacherProfile);
 router.put('/profile', updateTeacherProfile);
 
-// Admin management routes (require admin authentication)
 router.use(authMiddleware);
 router.use(adminMiddleware);
 

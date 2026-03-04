@@ -11,7 +11,6 @@ const {
   getWeeklySchedule
 } = require('../controllers/scheduleController');
 
-// Admin routes - mount at /api/v1/admin/schedules
 router.use(authMiddleware, adminMiddleware);
 router.get('/weekly', getWeeklySchedule);
 router.route('/')

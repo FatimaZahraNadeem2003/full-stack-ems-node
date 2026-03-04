@@ -22,30 +22,24 @@ const {
 } = require('../controllers/studentController');
 
 // Student-specific routes (require student authentication)
-router.use(authMiddleware);
-router.use(studentAuth);
+router.get('/profile', authMiddleware, studentAuth, getStudentProfile);
+router.put('/profile', authMiddleware, studentAuth, updateStudentProfile);
 
-router.get('/profile', getStudentProfile);
-router.put('/profile', updateStudentProfile);
+router.get('/courses', authMiddleware, studentAuth, getStudentCourses);
+router.get('/courses/:courseId', authMiddleware, studentAuth, getStudentCourseDetails);
 
-router.get('/courses', getStudentCourses);
-router.get('/courses/:courseId', getStudentCourseDetails);
+router.get('/schedule', authMiddleware, studentAuth, getStudentSchedule);
 
-router.get('/schedule', getStudentSchedule);
+router.get('/grades', authMiddleware, studentAuth, getAllStudentGrades);
+router.get('/grades/course/:courseId', authMiddleware, studentAuth, getCourseWiseGrades);
 
-router.get('/grades', getAllStudentGrades);
-router.get('/grades/course/:courseId', getCourseWiseGrades);
-
-router.get('/progress', getStudentProgress);
+router.get('/progress', authMiddleware, studentAuth, getStudentProgress);
 
 // Admin management routes (require admin authentication)
-router.use(authMiddleware);
-router.use(adminMiddleware);
-
-router.post('/', addStudent);
-router.get('/', getAllStudents);
-router.get('/:id', getStudentById);
-router.put('/:id', updateStudent);
-router.delete('/:id', deleteStudent);
+router.post('/', authMiddleware, adminMiddleware, addStudent);
+router.get('/', authMiddleware, adminMiddleware, getAllStudents);
+router.get('/:id', authMiddleware, adminMiddleware, getStudentById);
+router.put('/:id', authMiddleware, adminMiddleware, updateStudent);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteStudent);
 
 module.exports = router;
