@@ -1,11 +1,7 @@
 const { UnauthenticatedError, UnauthorizedError } = require("../errors");
 const { Teacher, Student } = require('../models');
 
-/**
- * Generic authorize middleware that checks if user has one of the allowed roles
- * @param  {...string} allowedRoles - Array of allowed roles
- * @returns {Function} Express middleware
- */
+
 const authorize = (...allowedRoles) => {
     return (req, res, next) => {
         if (!req.user) {
@@ -192,10 +188,7 @@ const teacherOrStudentAuth = async (req, res, next) => {
     }
 };
 
-/**
- * Check if user owns the resource or is admin
- * @param {Function} getResourceOwnerId - Function to extract owner ID from request
- */
+
 const authorizeOwnerOrAdmin = (getResourceOwnerId) => {
     return async (req, res, next) => {
         try {

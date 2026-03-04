@@ -52,8 +52,10 @@ app.use(
 );
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(xss());
 
@@ -92,7 +94,8 @@ app.get("/", (req, res) => {
     success: true,
     msg: "Education Management System API",
     version: "1.0.0",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    status: "Server is running and healthy"
   });
 });
 
@@ -100,6 +103,7 @@ app.get("/api/v1", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Education Management System API",
+    status: "healthy",
     endpoints: {
       auth: {
         register: "POST /api/v1/auth/register",
@@ -114,6 +118,15 @@ app.get("/api/v1", (req, res) => {
         delete: "DELETE /api/v1/users/:id"
       }
     }
+  });
+});
+
+app.get("/api/v1/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    message: "Backend is running and accessible"
   });
 });
 
