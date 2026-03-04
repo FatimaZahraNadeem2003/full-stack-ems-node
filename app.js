@@ -69,6 +69,7 @@ app.use("/api/admin/students", studentRoutes);
 app.use("/api/admin/teachers", teacherRoutes);
 app.use("/api/admin/courses", courseRoutes);
 app.use("/api/admin/schedules", scheduleRoutes);
+app.use("/api/teacher/schedules", scheduleRoutes);
 app.use("/api/admin/enrollments", enrollmentRoutes);
 app.use("/api/admin/reports", reportsRoutes);
 

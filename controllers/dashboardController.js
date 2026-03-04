@@ -1,4 +1,4 @@
-const { Course, Enrollment, Schedule } = require('../models');
+const { Course, Enrollment, Schedule, Student, Teacher, User } = require('../models');
 const { StatusCodes } = require('http-status-codes');
 
 const getDashboardStats = async (req, res) => {
@@ -7,9 +7,6 @@ const getDashboardStats = async (req, res) => {
     let stats = {};
 
     if (role === 'admin') {
-      const StudentModel = require('../models').Student;
-      const TeacherModel = require('../models').Teacher;
-      
       const today = new Date();
       const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
       const todayDay = days[today.getDay()];
@@ -27,8 +24,8 @@ const getDashboardStats = async (req, res) => {
         studentStatus,
         courseStatus
       ] = await Promise.all([
-        StudentModel.countDocuments(),
-        TeacherModel.countDocuments(),
+        Student.countDocuments(),
+        Teacher.countDocuments(),
         Course.countDocuments(),
         Enrollment.countDocuments(),
         Course.countDocuments({ status: 'active' }),
