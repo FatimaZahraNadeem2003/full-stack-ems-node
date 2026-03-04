@@ -21,7 +21,6 @@ const {
   deleteStudent
 } = require('../controllers/studentController');
 
-// Student-specific routes (require student authentication)
 router.get('/profile', authMiddleware, studentAuth, getStudentProfile);
 router.put('/profile', authMiddleware, studentAuth, updateStudentProfile);
 
@@ -35,7 +34,6 @@ router.get('/grades/course/:courseId', authMiddleware, studentAuth, getCourseWis
 
 router.get('/progress', authMiddleware, studentAuth, getStudentProgress);
 
-// Admin management routes (require admin authentication)
 router.post('/', authMiddleware, adminMiddleware, addStudent);
 router.get('/', authMiddleware, adminMiddleware, getAllStudents);
 router.get('/:id', authMiddleware, adminMiddleware, getStudentById);

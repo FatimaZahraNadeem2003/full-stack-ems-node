@@ -70,6 +70,8 @@ const getAllStudents = async (req, res) => {
   try {
     const { page = 1, limit = 10, search, class: studentClass, status } = req.query;
 
+    console.log('🔍 Get All Students - Query:', { page, limit, search, studentClass, status });
+
     const query = {};
     if (studentClass) query.class = studentClass;
     if (status) query.status = status;
@@ -89,6 +91,7 @@ const getAllStudents = async (req, res) => {
       if (userIds.length > 0) {
         query.userId = { $in: userIds };
       } else {
+        console.log('⚠️ No users found matching search');
         return res.status(StatusCodes.OK).json({
           success: true,
           count: 0,
@@ -102,6 +105,8 @@ const getAllStudents = async (req, res) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
+    console.log('📊 Final query:', JSON.stringify(query));
+    
     const students = await Student.find(query)
       .populate({
         path: 'userId',
@@ -113,6 +118,8 @@ const getAllStudents = async (req, res) => {
 
     const total = await Student.countDocuments(query);
 
+    console.log(`✅ Found ${students.length} students out of ${total} total`);
+
     res.status(StatusCodes.OK).json({
       success: true,
       count: students.length,
@@ -122,7 +129,7 @@ const getAllStudents = async (req, res) => {
       data: students
     });
   } catch (error) {
-    console.error('Get all students error:', error);
+    console.error('❌ Get all students error:', error);
     throw error;
   }
 };

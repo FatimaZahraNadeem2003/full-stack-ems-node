@@ -28,37 +28,31 @@ const {
   getTeacherStats
 } = require('../controllers/teacherController');
 
-router.use(authMiddleware);
-router.use(teacherAuth);
+router.get('/dashboard/stats', authMiddleware, teacherAuth, getTeacherDashboardStats);
 
-router.get('/dashboard/stats', getTeacherDashboardStats);
+router.get('/courses', authMiddleware, teacherAuth, getTeacherCourses);
+router.get('/courses/:courseId', authMiddleware, teacherAuth, getCourseDetails);
+router.get('/courses/:courseId/students', authMiddleware, teacherAuth, getCourseStudents);
 
-router.get('/courses', getTeacherCourses);
-router.get('/courses/:courseId', getCourseDetails);
-router.get('/courses/:courseId/students', getCourseStudents);
+router.post('/grades', authMiddleware, teacherAuth, addGrade);
+router.put('/grades/:id', authMiddleware, teacherAuth, updateGrade);
+router.get('/grades/course/:courseId', authMiddleware, teacherAuth, getCourseGrades);
+router.get('/grades/student/:studentId', authMiddleware, teacherAuth, getStudentGrades);
 
-router.post('/grades', addGrade);
-router.put('/grades/:id', updateGrade);
-router.get('/grades/course/:courseId', getCourseGrades);
-router.get('/grades/student/:studentId', getStudentGrades);
+router.get('/schedules', authMiddleware, teacherAuth, getTeacherSchedule);
+router.put('/schedules/:id', authMiddleware, teacherAuth, updateSchedule);
 
-router.get('/schedules', getTeacherSchedule);
-router.put('/schedules/:id', updateSchedule);
+router.post('/remarks', authMiddleware, teacherAuth, addRemark);
+router.get('/remarks/student/:studentId', authMiddleware, teacherAuth, getStudentRemarks);
 
-router.post('/remarks', addRemark);
-router.get('/remarks/student/:studentId', getStudentRemarks);
+router.get('/profile', authMiddleware, teacherAuth, getTeacherProfile);
+router.put('/profile', authMiddleware, teacherAuth, updateTeacherProfile);
 
-router.get('/profile', getTeacherProfile);
-router.put('/profile', updateTeacherProfile);
-
-router.use(authMiddleware);
-router.use(adminMiddleware);
-
-router.post('/', addTeacher);
-router.get('/', getAllTeachers);
-router.get('/:id', getTeacherById);
-router.put('/:id', updateTeacher);
-router.delete('/:id', deleteTeacher);
-router.get('/stats', getTeacherStats);
+router.post('/', authMiddleware, adminMiddleware, addTeacher);
+router.get('/', authMiddleware, adminMiddleware, getAllTeachers);
+router.get('/:id', authMiddleware, adminMiddleware, getTeacherById);
+router.put('/:id', authMiddleware, adminMiddleware, updateTeacher);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteTeacher);
+router.get('/stats', authMiddleware, adminMiddleware, getTeacherStats);
 
 module.exports = router;
