@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authentication');
-const { teacherAuth } = require('../middleware/authorization');
+const { teacherAuth, adminMiddleware } = require('../middleware/authorization');
 const {
   getTeacherDashboardStats,
   getTeacherCourses,
@@ -19,6 +19,16 @@ const {
   updateTeacherProfile
 } = require('../controllers/teacherModuleController');
 
+const {
+  addTeacher,
+  getAllTeachers,
+  getTeacherById,
+  updateTeacher,
+  deleteTeacher,
+  getTeacherStats
+} = require('../controllers/teacherController');
+
+// Teacher-specific routes (require teacher authentication)
 router.use(authMiddleware);
 router.use(teacherAuth);
 
@@ -41,5 +51,16 @@ router.get('/remarks/student/:studentId', getStudentRemarks);
 
 router.get('/profile', getTeacherProfile);
 router.put('/profile', updateTeacherProfile);
+
+// Admin management routes (require admin authentication)
+router.use(authMiddleware);
+router.use(adminMiddleware);
+
+router.post('/', addTeacher);
+router.get('/', getAllTeachers);
+router.get('/:id', getTeacherById);
+router.put('/:id', updateTeacher);
+router.delete('/:id', deleteTeacher);
+router.get('/stats', getTeacherStats);
 
 module.exports = router;

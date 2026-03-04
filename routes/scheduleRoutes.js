@@ -11,18 +11,15 @@ const {
   getWeeklySchedule
 } = require('../controllers/scheduleController');
 
-router.use('/admin', authMiddleware, adminMiddleware);
-router.get('/admin/weekly', getWeeklySchedule);
-router.route('/admin')
+// Admin routes - mount at /api/v1/admin/schedules
+router.use(authMiddleware, adminMiddleware);
+router.get('/weekly', getWeeklySchedule);
+router.route('/')
   .post(createSchedule)
   .get(getAllSchedules);
-router.route('/admin/:id')
+router.route('/:id')
   .get(getScheduleById)
   .put(updateSchedule)
   .delete(deleteSchedule);
-
-router.use('/teacher', authMiddleware, teacherAuth);
-router.get('/teacher/weekly', getWeeklySchedule);
-router.get('/teacher', getAllSchedules);
 
 module.exports = router;
