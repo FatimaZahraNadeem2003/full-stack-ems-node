@@ -169,7 +169,6 @@ const getAllSchedules = async (req, res) => {
       }
     }
 
-    // Handle teacherId filter
     if (teacherId) {
       const resolvedTeacherId = await resolveTeacherId(teacherId);
       if (resolvedTeacherId) {
