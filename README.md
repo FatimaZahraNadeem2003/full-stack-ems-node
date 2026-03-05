@@ -197,8 +197,8 @@ POST /api/admin/schedules
   "endTime": "10:30",
   "room": "101",
   "building": "Science Block",
-  "semester": "Fall 2024",
-  "academicYear": "2024-2025"
+  "semester": "Fall 2026",
+  "academicYear": "2026-2027"
 }
 🟠 Enrollment Management (/api/admin/enrollments)
 Method	Endpoint	Description	Access	Request Body
