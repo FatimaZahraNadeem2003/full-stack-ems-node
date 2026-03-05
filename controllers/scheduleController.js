@@ -80,7 +80,6 @@ const createSchedule = async (req, res) => {
       throw new BadRequestError('Room already booked for this time slot');
     }
 
-    // Check for teacher conflicts
     const teacherConflict = await Schedule.findOne({
       teacherId,
       dayOfWeek,
