@@ -185,7 +185,6 @@ const getAllSchedules = async (req, res) => {
       }
     }
 
-    // Handle search - search in course name, teacher name, room, building
     if (search && search.trim() !== '') {
       // First, find courses that match the search
       const courses = await Course.find({
