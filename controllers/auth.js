@@ -130,8 +130,21 @@ const login = async (req, res, next) => {
     let profile = null;
     if (user.role === 'student') {
       profile = await Student.findOne({ userId: user._id });
+      
+      if (profile && profile.status === 'suspended') {
+        throw new UnauthenticatedError("Your account has been suspended. Please contact administration.");
+      }
+      
+      if (profile && profile.status === 'inactive') {
+        throw new UnauthenticatedError("Your account is inactive. Please contact administration.");
+      }
+      
     } else if (user.role === 'teacher') {
       profile = await Teacher.findOne({ userId: user._id });
+      
+      if (profile && (profile.status === 'inactive' || profile.status === 'resigned')) {
+        throw new UnauthenticatedError("Your account is not active. Please contact administration.");
+      }
     }
   
     const token = user.createJWT();

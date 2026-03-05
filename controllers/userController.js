@@ -81,7 +81,7 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     id,
     { firstName, lastName, email },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).select('-password');
   
   if (!user) {

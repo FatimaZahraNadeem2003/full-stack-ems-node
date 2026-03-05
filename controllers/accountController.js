@@ -49,7 +49,7 @@ const updateMyProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       allowedUpdates,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).select('-password');
 
     res.status(StatusCodes.OK).json({

@@ -275,7 +275,7 @@ const updateGrade = async (req, res) => {
     const updatedGrade = await Grade.findByIdAndUpdate(
       id,
       updateData,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate([
       {
         path: 'studentId',
@@ -499,7 +499,7 @@ const updateSchedule = async (req, res) => {
     const updatedSchedule = await Schedule.findByIdAndUpdate(
       id,
       allowedUpdates,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate({
       path: 'courseId',
       select: 'name code'
@@ -657,7 +657,7 @@ const updateTeacherProfile = async (req, res) => {
     const updatedTeacher = await Teacher.findByIdAndUpdate(
       teacherId,
       allowedUpdates,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate({
       path: 'userId',
       select: '-password'
@@ -673,6 +673,7 @@ const updateTeacherProfile = async (req, res) => {
     throw error;
   }
 };
+
 
 module.exports = {
   getTeacherDashboardStats,

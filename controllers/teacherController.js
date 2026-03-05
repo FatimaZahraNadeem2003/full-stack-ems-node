@@ -228,7 +228,7 @@ const updateTeacher = async (req, res) => {
     ).populate({
       path: 'userId',
       select: '-password'
-    });
+    }).lean();
 
     res.status(StatusCodes.OK).json({
       success: true,

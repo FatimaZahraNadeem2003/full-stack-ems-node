@@ -196,6 +196,10 @@ const updateStudent = async (req, res) => {
       throw new NotFoundError('Student not found');
     }
 
+    if (updateData.status === 'suspended' && student.status !== 'suspended') {
+      console.log(`Student ${student._id} is being suspended`);
+    }
+
     if (updateData.firstName || updateData.lastName || updateData.email) {
       const userUpdate = {};
       if (updateData.firstName) userUpdate.firstName = updateData.firstName;
@@ -204,7 +208,7 @@ const updateStudent = async (req, res) => {
 
       if (Object.keys(userUpdate).length > 0) {
         await User.findByIdAndUpdate(student.userId, userUpdate, {
-          new: true,
+          returnDocument: 'after',
           runValidators: true
         });
       }
@@ -219,7 +223,7 @@ const updateStudent = async (req, res) => {
     const updatedStudent = await Student.findByIdAndUpdate(
       id,
       studentUpdate,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate({
       path: 'userId',
       select: '-password'

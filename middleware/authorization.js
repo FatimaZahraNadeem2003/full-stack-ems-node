@@ -134,6 +134,15 @@ const studentAuth = async (req, res, next) => {
       if (!student) {
         throw new UnauthorizedError("Student profile not found");
       }
+      
+      if (student.status === 'suspended') {
+        throw new UnauthorizedError("Your account has been suspended. Please contact administration.");
+      }
+      
+      if (student.status === 'inactive') {
+        throw new UnauthorizedError("Your account is inactive. Please contact administration.");
+      }
+      
       req.user.studentId = student._id.toString();
       req.user.student = student;
       return next();
