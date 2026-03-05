@@ -153,7 +153,6 @@ const getAllSchedules = async (req, res) => {
     if (academicYear) query.academicYear = { $regex: academicYear, $options: 'i' };
     if (status) query.status = status;
 
-    // Handle courseId filter
     if (courseId) {
       const resolvedCourseId = await resolveCourseId(courseId);
       if (resolvedCourseId) {
