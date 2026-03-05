@@ -13,7 +13,7 @@ const resolveTeacherId = async (teacherIdentifier) => {
         { employeeId: teacherIdentifier },
         { 'userId.email': teacherIdentifier }
       ]
-    });
+    }).lean();
     return teacher?._id;
   }
 };
@@ -29,7 +29,7 @@ const resolveCourseId = async (courseIdentifier) => {
         { code: courseIdentifier },
         { name: { $regex: courseIdentifier, $options: 'i' } }
       ]
-    });
+    }).lean();
     return course?._id;
   }
 };
@@ -50,6 +50,11 @@ const createSchedule = async (req, res) => {
       status
     } = req.body;
 
+    // Validate required fields
+    if (!courseId || !teacherId || !dayOfWeek || !startTime || !endTime || !room || !semester || !academicYear) {
+      throw new BadRequestError('Please provide all required fields');
+    }
+
     const course = await Course.findById(courseId);
     if (!course) {
       throw new NotFoundError('Course not found');
@@ -60,6 +65,7 @@ const createSchedule = async (req, res) => {
       throw new NotFoundError('Teacher not found');
     }
 
+    // Check for room conflicts
     const conflictingSchedule = await Schedule.findOne({
       dayOfWeek,
       room,
@@ -76,6 +82,7 @@ const createSchedule = async (req, res) => {
       throw new BadRequestError('Room already booked for this time slot');
     }
 
+    // Check for teacher conflicts
     const teacherConflict = await Schedule.findOne({
       teacherId,
       dayOfWeek,
@@ -133,22 +140,24 @@ const getAllSchedules = async (req, res) => {
     const { 
       page = 1, 
       limit = 10, 
+      search,
       dayOfWeek,
       courseId,
       teacherId,
       semester,
       academicYear,
-      status,
-      startDate,
-      endDate
+      status
     } = req.query;
 
     const query = {};
+    
+    // Apply filters
     if (dayOfWeek) query.dayOfWeek = dayOfWeek;
-    if (semester) query.semester = semester;
-    if (academicYear) query.academicYear = academicYear;
+    if (semester) query.semester = { $regex: semester, $options: 'i' };
+    if (academicYear) query.academicYear = { $regex: academicYear, $options: 'i' };
     if (status) query.status = status;
 
+    // Handle courseId filter
     if (courseId) {
       const resolvedCourseId = await resolveCourseId(courseId);
       if (resolvedCourseId) {
@@ -165,6 +174,7 @@ const getAllSchedules = async (req, res) => {
       }
     }
 
+    // Handle teacherId filter
     if (teacherId) {
       const resolvedTeacherId = await resolveTeacherId(teacherId);
       if (resolvedTeacherId) {
@@ -181,11 +191,64 @@ const getAllSchedules = async (req, res) => {
       }
     }
 
+    // Handle search - search in course name, teacher name, room, building
+    if (search && search.trim() !== '') {
+      // First, find courses that match the search
+      const courses = await Course.find({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { code: { $regex: search, $options: 'i' } },
+          { department: { $regex: search, $options: 'i' } }
+        ]
+      }).select('_id').lean();
+      
+      const courseIds = courses.map(c => c._id);
+
+      // Find teachers that match the search
+      const teachers = await Teacher.find({
+        $or: [
+          { 'userId.firstName': { $regex: search, $options: 'i' } },
+          { 'userId.lastName': { $regex: search, $options: 'i' } },
+          { employeeId: { $regex: search, $options: 'i' } },
+          { specialization: { $regex: search, $options: 'i' } }
+        ]
+      }).populate({
+        path: 'userId',
+        select: 'firstName lastName'
+      }).select('_id').lean();
+      
+      const teacherIds = teachers.map(t => t._id);
+
+      // Build search query
+      query.$or = [
+        { room: { $regex: search, $options: 'i' } },
+        { building: { $regex: search, $options: 'i' } },
+        { semester: { $regex: search, $options: 'i' } },
+        { academicYear: { $regex: search, $options: 'i' } }
+      ];
+
+      if (courseIds.length > 0) {
+        query.$or.push({ courseId: { $in: courseIds } });
+      }
+
+      if (teacherIds.length > 0) {
+        query.$or.push({ teacherId: { $in: teacherIds } });
+      }
+    }
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitNum = Math.min(parseInt(limit), 100);
 
     const schedules = await Schedule.find(query)
       .populate([
-        { path: 'courseId', select: 'name code credits department' },
+        { 
+          path: 'courseId', 
+          select: 'name code credits department',
+          populate: {
+            path: 'teacherId',
+            select: 'name'
+          }
+        },
         { 
           path: 'teacherId',
           populate: {
@@ -196,7 +259,8 @@ const getAllSchedules = async (req, res) => {
       ])
       .sort({ dayOfWeek: 1, startTime: 1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(limitNum)
+      .lean();
 
     const total = await Schedule.countDocuments(query);
 
@@ -207,18 +271,23 @@ const getAllSchedules = async (req, res) => {
       return acc;
     }, {});
 
+    console.log(`Found ${schedules.length} schedules matching query`);
+
     res.status(StatusCodes.OK).json({
       success: true,
       count: schedules.length,
       total,
       page: parseInt(page),
-      pages: Math.ceil(total / parseInt(limit)),
+      pages: Math.ceil(total / limitNum),
       data: schedules,
       groupedByDay
     });
   } catch (error) {
     console.error('Get all schedules error:', error);
-    throw error;
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      msg: 'Failed to fetch schedules'
+    });
   }
 };
 
@@ -226,9 +295,20 @@ const getScheduleById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new BadRequestError('Invalid schedule ID format');
+    }
+
     const schedule = await Schedule.findById(id)
       .populate([
-        { path: 'courseId', select: 'name code credits description' },
+        { 
+          path: 'courseId', 
+          select: 'name code credits description',
+          populate: {
+            path: 'teacherId',
+            select: 'name'
+          }
+        },
         { 
           path: 'teacherId',
           populate: {
@@ -236,7 +316,8 @@ const getScheduleById = async (req, res) => {
             select: 'firstName lastName email'
           }
         }
-      ]);
+      ])
+      .lean();
 
     if (!schedule) {
       throw new NotFoundError('Schedule not found');
@@ -257,11 +338,16 @@ const updateSchedule = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new BadRequestError('Invalid schedule ID format');
+    }
+
     const schedule = await Schedule.findById(id);
     if (!schedule) {
       throw new NotFoundError('Schedule not found');
     }
 
+    // Check for conflicts if time or room or teacher is being updated
     if (updateData.dayOfWeek || updateData.startTime || updateData.endTime || 
         updateData.room || updateData.teacherId) {
       
@@ -277,6 +363,7 @@ const updateSchedule = async (req, res) => {
         ]
       };
 
+      // Check room conflict
       if (updateData.room || schedule.room) {
         const roomConflict = await Schedule.findOne({
           ...conflictQuery,
@@ -287,6 +374,7 @@ const updateSchedule = async (req, res) => {
         }
       }
 
+      // Check teacher conflict
       if (updateData.teacherId || schedule.teacherId) {
         const teacherConflict = await Schedule.findOne({
           ...conflictQuery,
@@ -311,7 +399,7 @@ const updateSchedule = async (req, res) => {
           select: 'firstName lastName'
         }
       }
-    ]);
+    ]).lean();
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -328,12 +416,16 @@ const deleteSchedule = async (req, res) => {
   try {
     const { id } = req.params;
 
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw new BadRequestError('Invalid schedule ID format');
+    }
+
     const schedule = await Schedule.findById(id);
     if (!schedule) {
       throw new NotFoundError('Schedule not found');
     }
 
-    await schedule.deleteOne();
+    await Schedule.findByIdAndDelete(id);
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -378,7 +470,8 @@ const getWeeklySchedule = async (req, res) => {
           }
         }
       ])
-      .sort({ dayOfWeek: 1, startTime: 1 });
+      .sort({ dayOfWeek: 1, startTime: 1 })
+      .lean();
 
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const weeklySchedule = days.reduce((acc, day) => {
