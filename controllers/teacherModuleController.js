@@ -694,6 +694,41 @@ const updateTeacherProfile = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.userId;
+
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestError('Please provide current and new password');
+    }
+
+    if (newPassword.length < 6) {
+      throw new BadRequestError('Password must be at least 6 characters long');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    const isPasswordCorrect = await user.comparePassword(currentPassword);
+    if (!isPasswordCorrect) {
+      throw new BadRequestError('Current password is incorrect');
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    throw error;
+  }
+};
 
 module.exports = {
   getTeacherDashboardStats,
@@ -709,5 +744,6 @@ module.exports = {
   addRemark,
   getStudentRemarks,
   getTeacherProfile,
-  updateTeacherProfile
+  updateTeacherProfile,
+  changePassword
 };

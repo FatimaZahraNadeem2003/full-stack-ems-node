@@ -28,6 +28,8 @@ const {
   getTeacherStats
 } = require('../controllers/teacherController');
 
+const { changePassword } = require('../controllers/teacherModuleController');
+
 router.get('/dashboard/stats', authMiddleware, teacherAuth, getTeacherDashboardStats);
 
 router.get('/courses', authMiddleware, teacherAuth, getTeacherCourses);
@@ -47,6 +49,7 @@ router.get('/remarks/student/:studentId', authMiddleware, teacherAuth, getStuden
 
 router.get('/profile', authMiddleware, teacherAuth, getTeacherProfile);
 router.put('/profile', authMiddleware, teacherAuth, updateTeacherProfile);
+router.put('/change-password', authMiddleware, teacherAuth, changePassword);
 
 router.post('/', authMiddleware, adminMiddleware, addTeacher);
 router.get('/', authMiddleware, adminMiddleware, getAllTeachers);

@@ -12,7 +12,8 @@ const {
   getCourseWiseGrades,
   getStudentProgress,
   getAvailableCourses,  
-  enrollInCourse        
+  enrollInCourse,
+  changePassword        
 } = require('../controllers/studentModuleController');
 
 const {
@@ -25,6 +26,8 @@ const {
 
 router.get('/profile', authMiddleware, studentAuth, getStudentProfile);
 router.put('/profile', authMiddleware, studentAuth, updateStudentProfile);
+
+router.put('/change-password', authMiddleware, studentAuth, changePassword);
 
 router.get('/courses/available', authMiddleware, studentAuth, getAvailableCourses);
 router.get('/courses', authMiddleware, studentAuth, getStudentCourses);
