@@ -163,6 +163,8 @@ const getStudentCourseDetails = async (req, res) => {
     const { courseId } = req.params;
     const studentId = req.user.studentId;
 
+    console.log("Fetching course details for student:", studentId, "course:", courseId);
+
     const enrollment = await Enrollment.findOne({
       studentId,
       courseId,
@@ -180,56 +182,93 @@ const getStudentCourseDetails = async (req, res) => {
           path: 'userId',
           select: 'firstName lastName email'
         }
-      });
+      })
+      .lean();
+
+    if (!course) {
+      throw new NotFoundError('Course not found');
+    }
+
+    console.log("Course found:", course.name);
 
     const grades = await Grade.find({ studentId, courseId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log("Grades found:", grades.length);
 
     const schedules = await Schedule.find({
       courseId,
       status: 'scheduled'
-    }).sort({ dayOfWeek: 1, startTime: 1 });
+    }).sort({ dayOfWeek: 1, startTime: 1 }).lean();
 
     const totalMarks = grades.reduce((acc, g) => acc + g.obtainedMarks, 0);
     const totalMaxMarks = grades.reduce((acc, g) => acc + g.maxMarks, 0);
     const overallPercentage = totalMaxMarks > 0 ? (totalMarks / totalMaxMarks) * 100 : 0;
 
+    const responseData = {
+      _id: course._id,
+      name: course.name,
+      code: course.code,
+      description: course.description,
+      credits: course.credits,
+      department: course.department,
+      level: course.level,
+      syllabus: course.syllabus,
+      duration: course.duration,
+      maxStudents: course.maxStudents,
+      status: course.status,
+      teacher: course.teacherId ? {
+        name: `${course.teacherId.userId?.firstName || ''} ${course.teacherId.userId?.lastName || ''}`.trim(),
+        email: course.teacherId.userId?.email || '',
+        qualification: course.teacherId.qualification || '',
+        specialization: course.teacherId.specialization || ''
+      } : null,
+      enrollment: {
+        status: enrollment.status,
+        progress: enrollment.progress || 0,
+        enrolledDate: enrollment.enrollmentDate
+      },
+      academics: {
+        grades: grades.map(g => ({
+          _id: g._id,
+          assessmentType: g.assessmentType,
+          assessmentName: g.assessmentName,
+          maxMarks: g.maxMarks,
+          obtainedMarks: g.obtainedMarks,
+          percentage: g.percentage || ((g.obtainedMarks / g.maxMarks) * 100).toFixed(1),
+          grade: g.grade,
+          remarks: g.remarks,
+          submittedAt: g.submittedAt
+        })),
+        statistics: {
+          totalAssessments: grades.length,
+          overallPercentage: overallPercentage.toFixed(1),
+          averageGrade: grades.length > 0 
+            ? (grades.reduce((acc, g) => acc + (g.percentage || 0), 0) / grades.length).toFixed(1)
+            : '0'
+        }
+      },
+      schedule: schedules.map(s => ({
+        _id: s._id,
+        dayOfWeek: s.dayOfWeek,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        room: s.room,
+        building: s.building
+      }))
+    };
+
+    console.log("Sending response with data:", {
+      name: responseData.name,
+      department: responseData.department,
+      credits: responseData.credits,
+      gradesCount: responseData.academics.grades.length
+    });
+
     res.status(StatusCodes.OK).json({
       success: true,
-      data: {
-        course: {
-          id: course._id,
-          name: course.name,
-          code: course.code,
-          description: course.description,
-          credits: course.credits,
-          department: course.department,
-          level: course.level,
-          syllabus: course.syllabus
-        },
-        teacher: course.teacherId ? {
-          name: `${course.teacherId.userId.firstName} ${course.teacherId.userId.lastName}`,
-          email: course.teacherId.userId.email,
-          qualification: course.teacherId.qualification,
-          specialization: course.teacherId.specialization
-        } : null,
-        enrollment: {
-          status: enrollment.status,
-          progress: enrollment.progress,
-          enrolledDate: enrollment.enrollmentDate
-        },
-        academics: {
-          grades,
-          statistics: {
-            totalAssessments: grades.length,
-            overallPercentage: overallPercentage.toFixed(1),
-            averageGrade: grades.length > 0 
-              ? (grades.reduce((acc, g) => acc + (g.percentage || 0), 0) / grades.length).toFixed(1)
-              : 0
-          }
-        },
-        schedule: schedules
-      }
+      data: responseData
     });
   } catch (error) {
     console.error('Get student course details error:', error);
