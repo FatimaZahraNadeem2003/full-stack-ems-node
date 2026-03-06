@@ -1,43 +1,133 @@
-# Dependencies
-node_modules/
+# dependencies
+/node_modules
 package-lock.json
 yarn.lock
+pnpm-lock.yaml
 
-# Environment variables
+# environment variables
 .env
 .env.local
-.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
 
-# Logs
-logs/
+# database
+/data
+/database
+*.db
+*.sqlite
+*.sqlite3
+
+# logs
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Runtime data
+# runtime data
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory
-coverage/
+# coverage reports
+/coverage
+*.lcov
 
-# Build outputs
-dist/
-build/
+# build outputs
+/dist
+/build
+/out
 
-# MongoDB
-data/
-dump/
+# uploads
+/uploads
+/public/uploads
+/temp
+/tmp
+
+# config files 
+config/
+!config/example.js
+!config/example.json
+!config/*.example.js
+
+# certificates and keys
+*.pem
+*.key
+*.crt
+*.cert
+/secrets
+
+# docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+!docker-compose.example.yml
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
+*~
 .DS_Store
 Thumbs.db
+
+# testing
+/coverage
+/.nyc_output
+/test-results
+/junit.xml
+
+# production
+build/
+dist/
+
+# temp files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# jwt secrets 
+jwt-secret.txt
+jwt-private.key
+jwt-public.key
+
+# mongodb data directory 
+/data/db
+/mongodb
+
+# pm2 logs
+.pm2/
+pm2-*.log
+.pm2-*.log
+
+# npm cache
+.npm
+
+# vercel
+.vercel
+
+.next/
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.env*.local
+.env.local
+.env.development
+.env.test
+.env.production
+
+# secrets
+secrets/
+secrets.*
+*.secret
+*.secret.*
