@@ -16,11 +16,11 @@ const connectDB = async (mongoURI) => {
         });
 
         mongoose.connection.on('disconnected', () => {
-            console.log('⚠️ MongoDB disconnected - attempting to reconnect...');
+            console.log('⚠️ MongoDB disconnected');
         });
 
         mongoose.connection.on('reconnected', () => {
-            console.log('✅ MongoDB reconnected successfully');
+            console.log('✅ MongoDB reconnected');
         });
 
         return conn;
